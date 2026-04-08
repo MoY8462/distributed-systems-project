@@ -53,27 +53,153 @@ ul.task-list li input[type="checkbox"] {
 <section id="paso-1-revisar-las-entradas" class="level3">
 <h3 class="anchored" data-anchor-id="paso-1-revisar-las-entradas">Paso 1: Revisar las entradas</h3>
 <p>Propósito: Consolidar requisitos, casos de uso, atributos de calidad y restricciones que guiarán el diseño.</p>
-<p>Actividades: - Revisar requerimientos funcionales (UC) y no funcionales (QA). - Validar restricciones técnicas y supuestos (CON, CRN). - Priorizar drivers arquitectónicos para la iteración.</p>
-<p>Entradas esperadas: - Documento de requerimientos y diagramas suministrados. - Lista de casos de uso (UC-1..UC-15) y atributos QA listados. - Restricciones de plataforma (Kotlin Compose, React/Vue, Firebase).</p>
-<p>Salidas (artefactos): - Lista priorizada de drivers (QA-1, QA-5, QA-9, problemas de negocio). - Mapa de UC críticos para la iteración. - Supuestos y restricciones registradas.</p>
-<p>Criterios de aceptación del paso: - Todas las entradas principales están listadas y validadas con al menos un responsable. - Drivers priorizados documentados y vinculados a UC relevantes.</p>
-<p>Herramientas y notas: - Mantener una tabla simple con UC ↔︎ QA ↔︎ Restricción para trazabilidad.</p>
-<hr>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 36%">
+<col style="width: 63%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Categoría</th>
+<th style="text-align: left;">Detalles</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Propósito del diseño</strong></td>
+<td style="text-align: left;">Se trata de un sistema de nueva creación (<em>greenfield</em>) dentro de un dominio maduro. El propósito es producir un diseño arquitectónico (basado en un modelo <em>Edge-Cloud</em>) lo suficientemente detallado para soportar la construcción del sistema, resolviendo problemas críticos como la saturación de red, los altos costos de nube y la dependencia de internet.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Requerimientos funcionales primarios</strong></td>
+<td style="text-align: left;">• <strong>UC-1 (Visualizar cámaras en tiempo real):</strong> Porque soporta directamente el modelo de negocio core y está fuertemente ligado a problemas técnicos complejos de latencia (QA-1).<br>• <strong>UC-2 (Detectar anomalías):</strong> Porque es el núcleo tecnológico (IA) que resuelve el problema de la fatiga de alarmas (falsos positivos) y cambia el enfoque de reactivo a preventivo.<br>• <strong>UC-6 (Visualizar grabaciones):</strong> Porque es indispensable para el análisis forense post-incidente y está ligado a la restricción de consumo remoto sin depender del almacenamiento del dispositivo cliente (CON-3).</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Escenarios de atributos de calidad</strong></td>
+<td style="text-align: left;">Ver la tabla de escenarios detallada más abajo.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Restricciones</strong></td>
+<td style="text-align: left;">Todas las restricciones presentadas (<strong>CON-1, CON-2, CON-3</strong>) se incluyen como <em>drivers</em>, ya que imponen decisiones innegociables sobre la tecnología de las aplicaciones cliente (Kotlin) y la naturaleza obligatoria del consumo remoto de datos.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Consideraciones arquitectónicas</strong></td>
+<td style="text-align: left;">Todas las consideraciones arquitectónicas (<strong>CRN-1, CRN-2, CRN-3, CRN-4</strong>) se incluyen como <em>drivers</em> para la estructuración de la interfaz y comunicaciones, definiendo el uso de React/Vue, Kotlin Compose con MVVM y Firebase Cloud Messaging.</td>
+</tr>
+</tbody>
+</table>
+<!-- Tabla detallada de escenarios de atributos de calidad -->
 </section>
-<section id="paso-2-establecer-el-objetivo-de-la-iteración" class="level3">
-<h3 class="anchored" data-anchor-id="paso-2-establecer-el-objetivo-de-la-iteración">Paso 2: Establecer el objetivo de la iteración</h3>
-<p>Propósito: Definir los objetivos concretos y medibles que la iteración debe alcanzar.</p>
-<p>Actividades: - Formular objetivo general y objetivos específicos. - Traducir drivers en metas medibles (ej.: latencia &lt; 500 ms). - Acordar alcance con stakeholders (qué queda dentro/afuera).</p>
-<p>Salidas: - Enunciado de objetivo de iteración. - Lista de objetivos SMART (específicos, medibles, alcanzables, relevantes, con tiempo).</p>
-<p>Ejemplo de objetivos SMART para esta iteración: - Reducir envío de video a nube a &lt; 10% del volumen total para configuración de referencia (10 cámaras) — entrega: informe de medición. - Demostrar streaming E2E con latencia &lt; 500 ms en LAN en 90% de muestras — entrega: script de medición y resultados. - Implementar y validar mecanismo local de grabación con retención mínima de 24h.</p>
+<section id="escenarios-de-atributos-de-calidad" class="level3">
+<h3 class="anchored" data-anchor-id="escenarios-de-atributos-de-calidad">Escenarios de atributos de calidad</h3>
+<p>Con base en los problemas del negocio, los escenarios se han priorizado de la siguiente manera:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 21%">
+<col style="width: 21%">
+<col style="width: 28%">
+<col style="width: 28%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>ID del Escenario</th>
+<th>Atributo de calidad (resumen)</th>
+<th style="text-align: right;">Importancia para el Cliente</th>
+<th style="text-align: right;">Dificultad de Implementación</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>QA-1</strong></td>
+<td>Performance — Latencia E2E &lt; 500 ms</td>
+<td style="text-align: right;">Alta</td>
+<td style="text-align: right;">Alta</td>
+</tr>
+<tr class="even">
+<td><strong>QA-2</strong></td>
+<td>Modificabilidad — facilidad para cambiar dispositivos/firmware</td>
+<td style="text-align: right;">Alta</td>
+<td style="text-align: right;">Media</td>
+</tr>
+<tr class="odd">
+<td><strong>QA-3</strong></td>
+<td>Extensibilidad — agregar sensores/funcionalidades sin reescribir código</td>
+<td style="text-align: right;">Media</td>
+<td style="text-align: right;">Media</td>
+</tr>
+<tr class="even">
+<td><strong>QA-4</strong></td>
+<td>Seguridad — Registro y autenticación de dispositivos físicos</td>
+<td style="text-align: right;">Alta</td>
+<td style="text-align: right;">Media</td>
+</tr>
+<tr class="odd">
+<td><strong>QA-5</strong></td>
+<td>Disponibilidad — Funcionamiento local durante pérdida de red</td>
+<td style="text-align: right;">Alta</td>
+<td style="text-align: right;">Alta</td>
+</tr>
+<tr class="even">
+<td><strong>QA-6</strong></td>
+<td>Ligereza — Visualización y reproducción en dispositivos móviles</td>
+<td style="text-align: right;">Baja</td>
+<td style="text-align: right;">Baja</td>
+</tr>
+<tr class="odd">
+<td><strong>QA-7</strong></td>
+<td>Almacenamiento — Retención y gestión de eventos importantes</td>
+<td style="text-align: right;">Alta</td>
+<td style="text-align: right;">Alta</td>
+</tr>
+<tr class="even">
+<td><strong>QA-8</strong></td>
+<td>Adaptabilidad — Operar con cambios en el ambiente físico</td>
+<td style="text-align: right;">Alta</td>
+<td style="text-align: right;">Media</td>
+</tr>
+<tr class="odd">
+<td><strong>QA-9</strong></td>
+<td>Performance — Minimizar tráfico de red y costos de nube</td>
+<td style="text-align: right;">Alta</td>
+<td style="text-align: right;">Alta</td>
+</tr>
+<tr class="even">
+<td><strong>QA-10</strong></td>
+<td>Seguridad — Control de acceso y autenticación de usuarios</td>
+<td style="text-align: right;">Alta</td>
+<td style="text-align: right;">Media</td>
+</tr>
+<tr class="odd">
+<td><strong>QA-11</strong></td>
+<td>Performance — Procesar información registrada sin afectar rendimiento</td>
+<td style="text-align: right;">Media</td>
+<td style="text-align: right;">Media</td>
+</tr>
+<tr class="even">
+<td><strong>QA-12</strong></td>
+<td>Usabilidad — Interfaz intuitiva y eficiencia operativa para usuarios y técnicos</td>
+<td style="text-align: right;">Media</td>
+<td style="text-align: right;">Baja</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="paso-2-establecer-el-objetivo-de-la-iteración-selección-de-impulsores" class="level3">
+<h3 class="anchored" data-anchor-id="paso-2-establecer-el-objetivo-de-la-iteración-selección-de-impulsores">Paso 2: Establecer el objetivo de la iteración (selección de impulsores)</h3>
+<p>Está primera iteración de un sistema greenfield, el propósito es establecer la arquitectura general del sistema, teniendo en mente todos los drivers y todos los atributos de calidad:</p>
+<ul>
+<li><strong>QA-1</strong>: Performance</li>
+<li><strong>QA-5</strong>: Disponibilidad</li>
+<li><strong>QA-9</strong>: Performance</li>
+<li><strong>QA-10</strong>: Adaptabilidad</li>
+<li><strong>CON-1</strong>: Desarrollo Kotlin</li>
+<li><strong>CON-2</strong>: Aplicación multiplataforma</li>
+<li><strong>CON-3</strong>: Consumo remoto de bases</li>
+</ul>
 <hr>
 </section>
 <section id="paso-3-elegir-los-elementos-del-sistema-a-refinar" class="level3">
 <h3 class="anchored" data-anchor-id="paso-3-elegir-los-elementos-del-sistema-a-refinar">Paso 3: Elegir los elementos del sistema a refinar</h3>
-<p>Propósito: Seleccionar el foco de trabajo (qué parte del sistema se diseña y prototipa en esta iteración).</p>
-<p>Actividades: - Decidir niveles de abstracción (sistema completo, subsistemas específicos). - Seleccionar interfaces y contratos que deben definirse.</p>
-<p>Decisión propuesta: - Alcance: Sistema en su totalidad con foco operacional en los componentes Edge (ingesta, inferencia, storage) y la integración mínima con Cloud (eventos, auth, TURN/STUN).</p>
-<p>Entregables: - Lista de componentes y contratos API/BFF mínimos. - Mapa de dependencias entre componentes.</p>
+<p>Debido a que estamos trabajando un sistema greenfield en la primer iteración, el elemento a refinar es el sistema completo.</p>
 <hr>
 </section>
 <section id="paso-4-elegir-los-conceptos-de-diseño" class="level3">

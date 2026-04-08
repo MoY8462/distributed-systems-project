@@ -5,62 +5,56 @@ La **Iteración 1** en ADD 3.0 tiene como objetivo principal establecer la estru
 ### Paso 1: Revisar las entradas
 Propósito: Consolidar requisitos, casos de uso, atributos de calidad y restricciones que guiarán el diseño.
 
-Actividades:
-- Revisar requerimientos funcionales (UC) y no funcionales (QA).
-- Validar restricciones técnicas y supuestos (CON, CRN).
-- Priorizar drivers arquitectónicos para la iteración.
 
-Entradas esperadas:
-- Documento de requerimientos y diagramas suministrados.
-- Lista de casos de uso (UC-1..UC-15) y atributos QA listados.
-- Restricciones de plataforma (Kotlin Compose, React/Vue, Firebase).
+| Categoría | Detalles |
+| :--- | :------ |
+| **Propósito del diseño** | Se trata de un sistema de nueva creación (*greenfield*) dentro de un dominio maduro. El propósito es producir un diseño arquitectónico (basado en un modelo *Edge-Cloud*) lo suficientemente detallado para soportar la construcción del sistema, resolviendo problemas críticos como la saturación de red, los altos costos de nube y la dependencia de internet. |
+| **Requerimientos funcionales primarios** | • **UC-1 (Visualizar cámaras en tiempo real):** Porque soporta directamente el modelo de negocio core y está fuertemente ligado a problemas técnicos complejos de latencia (QA-1).<br>• **UC-2 (Detectar anomalías):** Porque es el núcleo tecnológico (IA) que resuelve el problema de la fatiga de alarmas (falsos positivos) y cambia el enfoque de reactivo a preventivo.<br>• **UC-6 (Visualizar grabaciones):** Porque es indispensable para el análisis forense post-incidente y está ligado a la restricción de consumo remoto sin depender del almacenamiento del dispositivo cliente (CON-3). |
+| **Escenarios de atributos de calidad** | Ver la tabla de escenarios detallada más abajo. |
+| **Restricciones** | Todas las restricciones presentadas (**CON-1, CON-2, CON-3**) se incluyen como *drivers*, ya que imponen decisiones innegociables sobre la tecnología de las aplicaciones cliente (Kotlin) y la naturaleza obligatoria del consumo remoto de datos. |
+| **Consideraciones arquitectónicas** | Todas las consideraciones arquitectónicas (**CRN-1, CRN-2, CRN-3, CRN-4**) se incluyen como *drivers* para la estructuración de la interfaz y comunicaciones, definiendo el uso de React/Vue, Kotlin Compose con MVVM y Firebase Cloud Messaging. |
 
-Salidas (artefactos):
-- Lista priorizada de drivers (QA-1, QA-5, QA-9, problemas de negocio).
-- Mapa de UC críticos para la iteración.
-- Supuestos y restricciones registradas.
+<!-- Tabla detallada de escenarios de atributos de calidad -->
 
-Criterios de aceptación del paso:
-- Todas las entradas principales están listadas y validadas con al menos un responsable.
-- Drivers priorizados documentados y vinculados a UC relevantes.
+### Escenarios de atributos de calidad
 
-Herramientas y notas:
-- Mantener una tabla simple con UC ↔ QA ↔ Restricción para trazabilidad.
+Con base en los problemas del negocio, los escenarios se han priorizado de la siguiente manera:
 
----
+| ID del Escenario | Atributo de calidad (resumen) | Importancia para el Cliente | Dificultad de Implementación |
+|---|---|---:|---:|
+| **QA-1** | Performance — Latencia E2E < 500 ms | Alta | Alta |
+| **QA-2** | Modificabilidad — facilidad para cambiar dispositivos/firmware | Alta | Media |
+| **QA-3** | Extensibilidad — agregar sensores/funcionalidades sin reescribir código | Media | Media |
+| **QA-4** | Seguridad — Registro y autenticación de dispositivos físicos | Alta | Media |
+| **QA-5** | Disponibilidad — Funcionamiento local durante pérdida de red | Alta | Alta |
+| **QA-6** | Ligereza — Visualización y reproducción en dispositivos móviles | Baja | Baja |
+| **QA-7** | Almacenamiento — Retención y gestión de eventos importantes | Alta | Alta |
+| **QA-8** | Adaptabilidad — Operar con cambios en el ambiente físico | Alta | Media |
+| **QA-9** | Performance — Minimizar tráfico de red y costos de nube | Alta | Alta |
+| **QA-10** | Seguridad — Control de acceso y autenticación de usuarios | Alta | Media |
+| **QA-11** | Performance — Procesar información registrada sin afectar rendimiento | Media | Media |
+| **QA-12** | Usabilidad — Interfaz intuitiva y eficiencia operativa para usuarios y técnicos | Media | Baja |
 
-### Paso 2: Establecer el objetivo de la iteración
-Propósito: Definir los objetivos concretos y medibles que la iteración debe alcanzar.
 
-Actividades:
-- Formular objetivo general y objetivos específicos.
-- Traducir drivers en metas medibles (ej.: latencia < 500 ms).
-- Acordar alcance con stakeholders (qué queda dentro/afuera).
 
-Salidas:
-- Enunciado de objetivo de iteración.
-- Lista de objetivos SMART (específicos, medibles, alcanzables, relevantes, con tiempo).
+### Paso 2: Establecer el objetivo de la iteración (selección de impulsores)
 
-Ejemplo de objetivos SMART para esta iteración:
-- Reducir envío de video a nube a < 10% del volumen total para configuración de referencia (10 cámaras) — entrega: informe de medición.
-- Demostrar streaming E2E con latencia < 500 ms en LAN en 90% de muestras — entrega: script de medición y resultados.
-- Implementar y validar mecanismo local de grabación con retención mínima de 24h.
+Está primera iteración de un sistema greenfield, el propósito es establecer la arquitectura general del sistema, teniendo en mente todos los drivers y todos los atributos de calidad:
+
+- **QA-1**: Performance
+- **QA-5**: Disponibilidad
+- **QA-9**: Performance
+- **QA-10**: Adaptabilidad
+- **CON-1**: Desarrollo Kotlin
+- **CON-2**: Aplicación multiplataforma
+- **CON-3**: Consumo remoto de bases
+
 
 ---
 
 ### Paso 3: Elegir los elementos del sistema a refinar
-Propósito: Seleccionar el foco de trabajo (qué parte del sistema se diseña y prototipa en esta iteración).
 
-Actividades:
-- Decidir niveles de abstracción (sistema completo, subsistemas específicos).
-- Seleccionar interfaces y contratos que deben definirse.
-
-Decisión propuesta:
-- Alcance: Sistema en su totalidad con foco operacional en los componentes Edge (ingesta, inferencia, storage) y la integración mínima con Cloud (eventos, auth, TURN/STUN).
-
-Entregables:
-- Lista de componentes y contratos API/BFF mínimos.
-- Mapa de dependencias entre componentes.
+Debido a que estamos trabajando un sistema greenfield en la primer iteración, el elemento a refinar es el sistema completo.
 
 ---
 
