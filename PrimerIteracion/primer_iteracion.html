@@ -204,11 +204,200 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="paso-4-elegir-los-conceptos-de-diseño" class="level3">
 <h3 class="anchored" data-anchor-id="paso-4-elegir-los-conceptos-de-diseño">Paso 4: Elegir los conceptos de diseño</h3>
-<p>Propósito: Seleccionar patrones, tácticas y alternativas tecnológicas para cumplir los drivers.</p>
-<p>Actividades: - Evaluar opciones (Edge vs.&nbsp;Cloud processing, protocolos de streaming, formatos de video, opciones de notificación). - Documentar pros/cons y decisiones con motivaciones técnicas y de negocio.</p>
-<p>Conceptos seleccionados (detallados): - Edge–Cloud: mantener video en local, enviar metadatos. - Alternativa: envío parcial continuo a la nube (no seleccionado por costo/banda). - Edge AI: - Opciones de modelos: Tiny-YOLO/ MobileNet/Quantized CNNs. - Estrategia: empezar con modelo ligero en CPU; considerar acelerador si es necesario. - Streaming: WebRTC - Backup: HLS/RTSP para visualización no interactiva (alta latencia). - TURN/STUN en la nube para romper NATs; priorizar P2P. - BFF: - Justificación: adaptar respuestas y seguridad por cliente (móvil/web).</p>
-<p>Salidas: - Documento de evaluación de alternativas y decisión final por patrón/táctica.</p>
-<hr>
+<!--
+**Arquitecturas de referencia consideradas**
+
+- **Edge–Cloud (Edge Computing):** Procesamiento local en un nodo Edge para reducir tráfico a la nube, mejorar latencias y permitir funcionamiento autónomo durante cortes de WAN. Trade-off: mayor complejidad en despliegue y gestión de dispositivos, necesidad de almacenamiento y cómputo local.
+- **Hub-and-Spoke (Núcleo centralizado con nodos remotos):** Un hub central gestiona control, almacenamiento y coordinación mientras los spokes (Edge/NVR) se conectan a él. Bueno para administración centralizada y consistencia; trade-off: el hub puede convertirse en cuello de botella y punto único de fallo si no se diseñan redundancias.
+- **API Gateway / BFF (Backend-for-Frontend):** Capa unificada de entrada que centraliza autenticación, límites de tasa, agregación y adaptación de APIs para clientes móvil/web. Facilita seguridad y evolución de APIs; trade-off: necesita dimensionamiento y alta disponibilidad.
+- **Microservicios + Service Mesh:** Servicios desacoplados por dominio con mesh para observabilidad, resiliencia y comunicación segura (mTLS). Escala bien y permite despliegues independientes; trade-off: mayor complejidad operativa y necesidad de experiencia en orquestación.
+- **Event-Driven (Broker/Event Sourcing):** Comunicaciones basadas en eventos para desacoplar productores/consumidores (p.ej. Kafka, RabbitMQ). Ideal para sincronización eventual y procesamiento asíncrono; trade-off: modelo mental distinto, latencia eventual y complejidad en garantías de entrega.
+- **Serverless / FaaS (Cloud Functions) para ciertos back-ends:** Útil para endpoints esporádicos o procesamiento on-demand (notificaciones, transformaciones). Reduce costos operativos en burst; trade-off: límites de ejecución y frío inicial en cargas continuas de streaming.
+- **Monolito modular (MVP rápido):** Aplicación monolítica bien modularizada para acelerar PoC; trade-off: re-arquitecturar luego si se requieren escalados finos.
+- **Arquitectura híbrida (Edge + Cloud + CDN/Tiers):** Combinación de patrones arriba para balancear latencia, coste y operabilidad: Edge para IA y grabación local; Cloud para orquestación, analítica histórica y backups.
+- **Aplicación nativa con patrón MVVM (referencia arquitectónica):** separación clara entre Vista, Presentación y Modelo; optimizada para rendimiento y control del ciclo de vida. Pros: mejor control de rendimiento y UX; Cons: mayor esfuerzo de mantenimiento por plataforma.
+- **Cliente ligero (thin client) con procesamiento fuera del dispositivo:** la aplicación actúa principalmente como interfaz y visualizador; procesamiento/IA se realiza en Edge/Cloud. Pros: actualizaciones de lógica fuera del dispositivo; Cons: dependencia de conectividad y latencia.
+- **PWA (Progressive Web App) para dashboard:** habilitar capacidades offline-limitadas y mejoras de responsividad e instalabilidad. Pros: offline resiliente y mejor UX móvil; Cons: no siempre necesario para administradores y añade complejidad.
+- **Composición de widgets/embebidos (dashboard as a shell):** Shell que carga widgets autónomos (pueden ser micro-frontends o iframes controlados) para permitir extensibilidad del ecosistema. Pros: extensible y multitenant; Cons: orquestación de comunicaciones y seguridad entre widgets.
+
+- **Autenticación Stateless:** Modelo de autenticación basado en tokens firmados (p. ej. JWT/OAuth2 bearer) donde el servidor no mantiene estado de sesión; permite escalado horizontal de la capa de autenticación y simplifica integración con API Gateway/BFF. Trade-offs: requiere cuidado en caducidad/refresh, revocación y rotación de claves.
+
+- **Store-and-Forward (Almacenamiento y reenvío):** Patrón en el que un nodo intermedio (p. ej. Edge/NVR) almacena temporalmente datos/ eventos cuando la conectividad hacia la nube está degradada y los reenvía cuando la conexión se restablece. Ideal para garantizar disponibilidad local y minimizar tráfico a la nube; trade-offs: requiere mecanismos de persistencia, deduplicación y resolución de conflictos al sincronizar.
+-->
+</section>
+<section id="arquitecturas-propuestas-seleccionadas" class="level3">
+<h3 class="anchored" data-anchor-id="arquitecturas-propuestas-seleccionadas">Arquitecturas propuestas seleccionadas</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 36%">
+<col style="width: 63%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Arquitectura / Patrón</th>
+<th style="text-align: left;">Por qué se seleccionó</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Edge Computing</td>
+<td style="text-align: left;">Reduce latencia E2E y minimiza tráfico de video a la nube, permite grabación y detección local durante cortes de WAN (aborda directamente QA-1, QA-5 y QA-9), soporte para consumo remoto (CON-3) mediante sincronización selectiva.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">API Gateway / BFF</td>
+<td style="text-align: left;">Centraliza adaptación de APIs para clientes, gestión de seguridad y límites de acceso; facilita cumplimiento de QA-10 (seguridad) y simplifica integración con clientes móviles/web (CON-2, CON-3).</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">MVVM (móvil)</td>
+<td style="text-align: left;">Patrón de referencia para separar UI y lógica de presentación en la app móvil; favorece mantenibilidad, testabilidad y usabilidad (QA-12) y cumple con el requisito de desarrollo móvil (CON-1).</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">SPA (dashboard)</td>
+<td style="text-align: left;">Ofrece experiencia de usuario fluida e interactiva para el panel de administración, facilita visualización en tiempo real y widgets; se integra bien con API Gateway/BFF para adaptar datos al cliente.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Autenticación Stateless</td>
+<td style="text-align: left;">Uso de tokens y validación sin sesión en servidor para escalar autenticación (QA-10), simplificar gestión de sesión y facilitar integración con BFF/API Gateway; trade-off: requiere diseño de refresh tokens y rotación segura.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Store-and-Forward (Almacenamiento y reenvío)</td>
+<td style="text-align: left;">Permite retención local de eventos y reenvío selectivo hacia Cloud, reduciendo tráfico y garantizando disponibilidad durante cortes WAN; trade-off: añadir persistencia y lógica de reconciliación.</td>
+</tr>
+</tbody>
+</table>
+<!--
+| Arquitectura / Patrón | QA-1 | QA-5 | QA-9 | QA-10 | CON-1 | CON-2 | CON-3 | Comentario |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| Edge Computing | ✓ | ✓ | ✓ | ~ | ✗ | ✗ | ✓ | Reduce latencia y tráfico; permite disponibilidad local. |
+| API Gateway / BFF | ~ | ~ | ~ | ✓ | ✗ | ✓ | ✓ | Acelera seguridad y adaptación de APIs; facilita consumo remoto y soporte multiplataforma. |
+| MVVM (móvil) | ~ | ~ | ~ | ~ | ✓ | ✗ | ~ | Patrón que satisface CON-1 y mejora usabilidad/testabilidad (QA-12). |
+| SPA (dashboard) | ~ | ~ | ~ | ~ | ✗ | ✓ | ~ | Satisface CON-2 y mejora la usabilidad (QA-12) del dashboard; se apoya en BFF para seguridad y adaptación. |
+| Autenticación Stateless | ~ | ~ | ~ | ✓ | ✗ | ✓ | ✓ | Facilita escalado y compatibilidad multiplataforma; mejora seguridad mediante firmas y short-lived tokens, requiere estrategia de refresh/rotación. |
+| Store-and-Forward (Almacenamiento y reenvío) | ~ | ✓ | ✓ | ~ | ✗ | ✗ | ✓ | Mejora disponibilidad local (QA-5) y minimiza tráfico a la nube (QA-9); requiere diseño para sincronización y deduplicación. |
+-->
+</section>
+<section id="arquitecturas-propuestas-no-seleccionadas" class="level3">
+<h3 class="anchored" data-anchor-id="arquitecturas-propuestas-no-seleccionadas">Arquitecturas propuestas no seleccionadas</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 36%">
+<col style="width: 63%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Arquitectura / Patrón</th>
+<th style="text-align: left;">Por qué no se seleccionó</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Hub-and-Spoke</td>
+<td style="text-align: left;">Centraliza datos/control; aumenta riesgo de punto único de fallo y requiere inversión en redundancia antes de ser apropiado.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Microservicios + Service Mesh</td>
+<td style="text-align: left;">Requiere madurez operativa (observabilidad, orquestación); se pospone hasta validar carga y necesidades de despliegue independiente.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Event-Driven (Broker)</td>
+<td style="text-align: left;">Añade consistencia eventual y complejidad en garantías; útil para procesos asíncronos, no prioritario para primer PoC que necesita latencia determinista.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Serverless / FaaS</td>
+<td style="text-align: left;">No apto para cargas de streaming continuo; considerado para funciones auxiliares (transformaciones, notificaciones) posteriormente.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Monolito modular</td>
+<td style="text-align: left;">Útil para prototipos rápidos, pero no resuelve drivers críticos de latencia y disponibilidad a escala.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">SSR (Server-Side Rendering) para dashboard</td>
+<td style="text-align: left;">Mejora primer paint/SEO pero añade complejidad infra; no prioritario para panel administrativo interno.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">PWA (dashboard)</td>
+<td style="text-align: left;">Añade offline y mejora UX móvil; no es requisito crítico para la iteración inicial del panel.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Micro-frontends</td>
+<td style="text-align: left;">Permite despliegue por equipo, pero añade complejidad de integración que retrasaría entregables tempranos.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Widgets / Shell</td>
+<td style="text-align: left;">Extensible, pero orquestación e integración segura entre widgets es trabajo adicional no crítico ahora.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Thin client (móvil)</td>
+<td style="text-align: left;">Depende fuertemente de Edge/Cloud para procesamiento; incumpliría QA-1 en escenarios de latencia estricta.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Local-first / Offline-first (móvil)</td>
+<td style="text-align: left;">Muy valioso para resiliencia (QA-5) pero complica la sincronización; requiere diseñar estrategias de resolución de conflictos.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature modules (móvil)</td>
+<td style="text-align: left;">Buena práctica para organización, no es una alternativa arquitectónica que resuelva drivers por sí misma; se adoptará dentro de la implementación.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Streaming/reactive client (móvil)</td>
+<td style="text-align: left;">Cumple QA-1 pero implica mayor esfuerzo de pruebas y control de recursos; se puede incorporar como mejora del cliente en la misma iteración si deciden priorizarlo.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Shell + plugins (móvil)</td>
+<td style="text-align: left;">Extensible y adaptativo, pero añade complejidad de seguridad y compatibilidad que queda para futuras iteraciones.</td>
+</tr>
+</tbody>
+</table>
+<!--
+La tabla siguiente marca con ✓ (cumple), ~ (parcial) o ✗ (no cumple) cómo cada arquitectura propuesta contribuye a los drivers de la iteración inicial.
+
+| Arquitectura / Patrón | QA-1 | QA-5 | QA-9 | QA-10 | CON-1 | CON-2 | CON-3 | Comentario |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| Hub-and-Spoke | ~ | ~ | ~ | ~ | ✗ | ✗ | ~ | Centralización facilita control, pero puede afectar latencia y disponibilidad sin redundancia. |
+| Microservicios + Service Mesh | ~ | ✓ | ~ | ✓ | ✗ | ✗ | ~ | Escala resiliente y seguridad; overhead operativo. |
+| Event-Driven | ~ | ✓ | ✓ | ~ | ✗ | ✗ | ~ | Reduce tráfico síncrono y mejora desacoplo; introduce eventual consistency. |
+| Serverless / FaaS | ✗ | ~ | ~ | ~ | ✗ | ✗ | ~ | Adecuado para cargas event-driven, no para streaming con QA-1. |
+| Monolito modular | ~ | ~ | ~ | ~ | ✗ | ✗ | ~ | Rápido para PoC, limitado para drivers críticos de latencia/disponibilidad. |
+| SSR (dashboard) | ~ | ~ | ~ | ~ | ✗ | ✓ | ~ | Mejora primer paint (UX), pero no impacta latencia de video ni disponibilidad Edge. |
+| PWA (dashboard) | ~ | ✓ | ~ | ~ | ✗ | ✓ | ~ | Ofrece offline parcial y mejor experiencia móvil; no prioritaria. |
+| Micro-frontends | ~ | ~ | ~ | ~ | ✗ | ✓ | ~ | Facilita despliegue por equipo; no resuelve latencia por sí misma. |
+| Widgets / Shell | ~ | ~ | ~ | ~ | ✗ | ✓ | ~ | Extensible, pero requiere trabajo de integración/seguridad. |
+| Thin client (móvil) | ✗ | ✗ | ✗ | ~ | ✓ | ✗ | ✓ | Depende de Edge/Cloud; riesgo sobre QA-1. |
+| Local-first / Offline-first (móvil) | ~ | ✓ | ✓ | ~ | ✓ | ✗ | ✓ | Resiliente a desconexiones; complejidad en sincronización. |
+| Feature modules (móvil) | ~ | ~ | ~ | ~ | ✓ | ✗ | ~ | Mejora organización/entrega pero no es una solución arquitectónica principal. |
+| Streaming/reactive client (móvil) | ✓ | ~ | ~ | ~ | ✓ | ✗ | ~ | Cumple QA-1; requiere esfuerzo en pruebas y optimización. |
+| Shell + plugins (móvil) | ~ | ~ | ~ | ~ | ✓ | ✗ | ~ | Extensible, futura opción para ecosistema de capacidades.
+-->
+</section>
+<section id="diagramas" class="level3">
+<h3 class="anchored" data-anchor-id="diagramas">Diagramas</h3>
+<br>
+<div style="text-align:center">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="edge.png" class="img-fluid figure-img" alt="Diagrama de despliegue" width="600"></p>
+<figcaption>Figura 1. Arquitectura Edge Computing</figcaption>
+</figure>
+</div>
+</div>
+<br>
+<div style="text-align:center">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="mvvm.png" class="img-fluid figure-img" alt="Diagrama de modelo vista vista-modelo" width="600"></p>
+<figcaption>Figura 2. Arquitectura Modelo Vista Vista-Modelo</figcaption>
+</figure>
+</div>
+</div>
+<br>
+<div style="text-align:center">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="spa.png" class="img-fluid figure-img" alt="Diagrama de patrón Single Page Application" width="350"></p>
+<figcaption>Figura 3. Patrón Single Page Application</figcaption>
+</figure>
+</div>
+</div>
 </section>
 <section id="paso-5-instanciar-elementos-arquitectónicos-y-asignar-responsabilidades" class="level3">
 <h3 class="anchored" data-anchor-id="paso-5-instanciar-elementos-arquitectónicos-y-asignar-responsabilidades">Paso 5: Instanciar elementos arquitectónicos y asignar responsabilidades</h3>
@@ -234,6 +423,85 @@ ul.task-list li input[type="checkbox"] {
 <p>Resultados esperados y métricas: - Latencia E2E &lt; 500 ms en 90% de muestras (SP-1). - Volumen a la nube &lt; 10% del video total (SP-2). - Sincronización de eventos críticos &lt; 10 minutos (SP-3).</p>
 <p>Riesgos transversales y mitigaciones (resumen): - Capacidad Edge insuficiente → modelos optimizados, aceleradores. - WebRTC no cumple en condiciones móviles reales → ajustes de códec, fallback HLS. - Escalado de TURN/STUN → plan de dimensionamiento y uso de proveedores.</p>
 <p>Entregables finales de la iteración: - Documento <code>primer_iteracion.qmd</code> (actualizado, con pasos detallados). - ADRs en <code>/docs/adr/</code>. - Diagrama de despliegue y flujo de datos. - Scripts de prueba para latencia y ancho de banda (básico).</p>
+</section>
+<section id="tablas-de-alternativas-descartadas" class="level3">
+<h3 class="anchored" data-anchor-id="tablas-de-alternativas-descartadas">Tablas de alternativas descartadas</h3>
+<p><strong>Alternativas descartadas para la Arquitectura física (Edge–Cloud)</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Alternativa</th>
+<th style="text-align: left;">Razón para descartar</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Arquitectura puramente Cloud (Nube centralizada)</td>
+<td style="text-align: left;">Transmitir video de alta resolución 24/7 desde decenas de cámaras a la nube saturaría el ancho de banda del cliente y generaría costos de almacenamiento exorbitantes; vulnera QA-9 y QA-5.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Alternativas descartadas para la arquitectura del servidor</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Alternativa</th>
+<th style="text-align: left;">Razón para descartar</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Arquitectura Monolítica</td>
+<td style="text-align: left;">Más simple para iniciar, pero dificulta escalar independientemente servicios críticos (streaming, notificaciones, IA), comprometiendo rendimiento y flexibilidad futura.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Alternativas descartadas para la arquitectura cliente</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Alternativa</th>
+<th style="text-align: left;">Razón para descartar</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Aplicación de Cliente Rico (Desktop)</td>
+<td style="text-align: left;">Requiere instalación local, contradice el acceso ágil y remoto vía navegadores web multiplataforma (CON-2).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Alternativas descartadas para la capa de comunicación</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Alternativa</th>
+<th style="text-align: left;">Razón para descartar</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">HLS (HTTP Live Streaming)</td>
+<td style="text-align: left;">Introduce latencias de 3–10s por segmentación, incumpliendo el requisito de latencia crítica (QA-1).</td>
+</tr>
+</tbody>
+</table>
 </section>
 
 </main>
