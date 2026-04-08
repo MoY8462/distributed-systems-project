@@ -1,0 +1,171 @@
+La **Iteración 1** en ADD 3.0 tiene como objetivo principal establecer la estructura general del sistema (marco de referencia arquitectónico) resolviendo los *drivers* más críticos del negocio. Esta versión preserva la organización original por pasos y amplía cada uno con actividades, decisiones, criterios testables y entregables.
+
+---
+
+### Paso 1: Revisar las entradas
+Propósito: Consolidar requisitos, casos de uso, atributos de calidad y restricciones que guiarán el diseño.
+
+Actividades:
+- Revisar requerimientos funcionales (UC) y no funcionales (QA).
+- Validar restricciones técnicas y supuestos (CON, CRN).
+- Priorizar drivers arquitectónicos para la iteración.
+
+Entradas esperadas:
+- Documento de requerimientos y diagramas suministrados.
+- Lista de casos de uso (UC-1..UC-15) y atributos QA listados.
+- Restricciones de plataforma (Kotlin Compose, React/Vue, Firebase).
+
+Salidas (artefactos):
+- Lista priorizada de drivers (QA-1, QA-5, QA-9, problemas de negocio).
+- Mapa de UC críticos para la iteración.
+- Supuestos y restricciones registradas.
+
+Criterios de aceptación del paso:
+- Todas las entradas principales están listadas y validadas con al menos un responsable.
+- Drivers priorizados documentados y vinculados a UC relevantes.
+
+Herramientas y notas:
+- Mantener una tabla simple con UC ↔ QA ↔ Restricción para trazabilidad.
+
+---
+
+### Paso 2: Establecer el objetivo de la iteración
+Propósito: Definir los objetivos concretos y medibles que la iteración debe alcanzar.
+
+Actividades:
+- Formular objetivo general y objetivos específicos.
+- Traducir drivers en metas medibles (ej.: latencia < 500 ms).
+- Acordar alcance con stakeholders (qué queda dentro/afuera).
+
+Salidas:
+- Enunciado de objetivo de iteración.
+- Lista de objetivos SMART (específicos, medibles, alcanzables, relevantes, con tiempo).
+
+Ejemplo de objetivos SMART para esta iteración:
+- Reducir envío de video a nube a < 10% del volumen total para configuración de referencia (10 cámaras) — entrega: informe de medición.
+- Demostrar streaming E2E con latencia < 500 ms en LAN en 90% de muestras — entrega: script de medición y resultados.
+- Implementar y validar mecanismo local de grabación con retención mínima de 24h.
+
+---
+
+### Paso 3: Elegir los elementos del sistema a refinar
+Propósito: Seleccionar el foco de trabajo (qué parte del sistema se diseña y prototipa en esta iteración).
+
+Actividades:
+- Decidir niveles de abstracción (sistema completo, subsistemas específicos).
+- Seleccionar interfaces y contratos que deben definirse.
+
+Decisión propuesta:
+- Alcance: Sistema en su totalidad con foco operacional en los componentes Edge (ingesta, inferencia, storage) y la integración mínima con Cloud (eventos, auth, TURN/STUN).
+
+Entregables:
+- Lista de componentes y contratos API/BFF mínimos.
+- Mapa de dependencias entre componentes.
+
+---
+
+### Paso 4: Elegir los conceptos de diseño
+Propósito: Seleccionar patrones, tácticas y alternativas tecnológicas para cumplir los drivers.
+
+Actividades:
+- Evaluar opciones (Edge vs. Cloud processing, protocolos de streaming, formatos de video, opciones de notificación).
+- Documentar pros/cons y decisiones con motivaciones técnicas y de negocio.
+
+Conceptos seleccionados (detallados):
+- Edge–Cloud: mantener video en local, enviar metadatos.
+    - Alternativa: envío parcial continuo a la nube (no seleccionado por costo/banda).
+- Edge AI:
+    - Opciones de modelos: Tiny-YOLO/ MobileNet/Quantized CNNs.
+    - Estrategia: empezar con modelo ligero en CPU; considerar acelerador si es necesario.
+- Streaming: WebRTC
+    - Backup: HLS/RTSP para visualización no interactiva (alta latencia).
+    - TURN/STUN en la nube para romper NATs; priorizar P2P.
+- BFF:
+    - Justificación: adaptar respuestas y seguridad por cliente (móvil/web).
+
+Salidas:
+- Documento de evaluación de alternativas y decisión final por patrón/táctica.
+
+---
+
+### Paso 5: Instanciar elementos arquitectónicos y asignar responsabilidades
+Propósito: Definir, por componente, qué hace, qué guarda, qué expone y cómo se prueba.
+
+Componentes clave y responsabilidades ampliadas:
+- Cámaras IP
+    - Salida: flujo RTSP/ONVIF o stream compatible con NVR.
+    - Pruebas: integridad de frames, latencia de captura.
+- Servidor Edge (NVR/Gateway)
+    - Ingesta: capturar múltiples streams, transcodificar si aplica.
+    - Almacenamiento: retención local configurable (p. ej. 24–72h), gestión de circular buffer.
+    - Inferencia: ejecutar modelos optimizados; exponer API REST local para consultas.
+    - Streaming: endpoint WebRTC para conexión directa con cliente; control de sesiones y permisos.
+    - Sincronización: cola de eventos con confirmación hacia Cloud.
+    - Monitorización: métricas locales (CPU, memoria, I/O, ancho de banda).
+- Cloud (Backend mínimo)
+    - Auth Service: registro/login, roles, emisión de tokens.
+    - Event Service: recepción y almacenamiento de metadatos, API para consulta histórica.
+    - Notificaciones: FCM integradas para push.
+    - TURN/STUN: servicio gestionado para facilitar sesión WebRTC.
+- Clientes
+    - App móvil: consumes BFF, WebRTC client, subscripción FCM.
+    - Dashboard web: administración y visualización de salud.
+
+Interfaces y contratos:
+- API local Edge: REST endpoints para control y metadatos; WebRTC for media.
+- BFF: endpoints autenticados y adaptados para móvil/web.
+
+Pruebas por componente:
+- Edge: pruebas de carga para N cámaras simuladas, latencia E2E.
+- Cloud: pruebas de encolado y persistencia de eventos.
+
+---
+
+### Paso 6: Bosquejar vistas y registrar decisiones (ADR)
+Propósito: Formalizar las decisiones arquitectónicas y justificar trade-offs.
+
+Formato mínimo ADR por decisión:
+- ID: DEC-X
+- Contexto: problema que motiva la decisión.
+- Decisión: qué se adopta.
+- Consecuencias: impacto positivo y negativo.
+- Alternativas consideradas.
+
+Ejemplos resumidos:
+- DEC-1: Adoptar Edge–Cloud (contexto: reducir tráfico y tolerar desconexiones).
+- DEC-2: Ejecutar IA en Edge (contexto: reducir falsos positivos y latencia).
+- DEC-3: WebRTC + TURN/STUN (contexto: latencia y NAT traversal).
+
+Salida:
+- Colección de ADRs en /docs/adr/ con referencias a UC y QA.
+
+---
+
+### Paso 7: Analizar el diseño respecto al objetivo y definir pruebas
+Propósito: Verificar que las decisiones cumplen los objetivos y definir cómo probarlo.
+
+Actividades:
+- Definir escenarios de prueba para cada criterio de aceptación.
+- Crear scripts/sensores para medir latencia y consumo de banda.
+- Definir umbrales de éxito y summar report.
+
+Escenarios de prueba (ejemplos):
+- SP-1 (Latencia LAN): Cliente móvil en LAN se conecta a Edge via WebRTC; medir E2E 100 muestras.
+- SP-2 (Uso normal vs evento): Simular 10 cámaras; medir volumen enviado a Cloud en operación continua vs solo eventos (1 día).
+- SP-3 (Desconexión): Cortar WAN por 2 horas; verificar grabación local continúa y sincronización en < 10 minutos tras restablecer.
+
+Resultados esperados y métricas:
+- Latencia E2E < 500 ms en 90% de muestras (SP-1).
+- Volumen a la nube < 10% del video total (SP-2).
+- Sincronización de eventos críticos < 10 minutos (SP-3).
+
+Riesgos transversales y mitigaciones (resumen):
+- Capacidad Edge insuficiente → modelos optimizados, aceleradores.
+- WebRTC no cumple en condiciones móviles reales → ajustes de códec, fallback HLS.
+- Escalado de TURN/STUN → plan de dimensionamiento y uso de proveedores.
+
+Entregables finales de la iteración:
+- Documento `primer_iteracion.qmd` (actualizado, con pasos detallados).
+- ADRs en `/docs/adr/`.
+- Diagrama de despliegue y flujo de datos.
+- Scripts de prueba para latencia y ancho de banda (básico).

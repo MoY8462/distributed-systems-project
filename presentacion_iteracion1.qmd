@@ -1,0 +1,116 @@
+---
+title: "Iteración 1 — Arquitectura (ADD 3.0)"
+author: "Equipo de Proyecto"
+date: "2026-04-07"
+format:
+  revealjs:
+    theme: solarized
+    transition: slide
+    incremental: true
+---
+
+# Resumen
+
+- Objetivo: Presentar la arquitectura propuesta y el plan de la Iteración 1.
+- Entregables: documento de arquitectura, ADRs, diagrama de despliegue y scripts de prueba.
+
+---
+
+## Objetivos de la iteración
+
+- Minimizar tráfico a la nube (QA-9).
+- Operación local y sincronización tras caída de conexión (QA-5).
+- Streaming de baja latencia (< 500 ms) (QA-1).
+- Control de acceso básico (QA-10).
+
+---
+
+## Paso 1 — Revisar las entradas
+
+- Requerimientos funcionales y no funcionales relevantes.
+- Casos de uso críticos: UC-1, UC-2, UC-3, UC-6, UC-10.
+- Restricciones: Kotlin Compose (móvil), React/Vue (admin), Firebase.
+
+Notas para la presentación:
+- Mostrar tabla UC ↔ QA ↔ Restricción.
+
+---
+
+## Paso 2 — Objetivos SMART
+
+- CA-1: Latencia E2E < 500 ms en 90% de muestras (lab).
+- CA-2: Volumen enviado a nube < 10% (config. 10 cámaras).
+- CA-3: Edge mantiene 24h de video localmente.
+
+---
+
+## Paso 3 — Elementos a refinar
+
+- Foco: componentes Edge (ingesta, inferencia, storage) + integración mínima Cloud.
+- Entregables: lista de componentes, contratos API/BFF.
+
+---
+
+## Paso 4 — Conceptos de diseño
+
+- Arquitectura: Edge–Cloud.
+- IA en el borde: modelos ligeros (Tiny-YOLO, MobileNet quant).
+- Streaming: WebRTC (+ TURN/STUN), fallback HLS/RTSP.
+- BFF para adaptar APIs a clientes.
+
+---
+
+## Paso 5 — Instanciar elementos y responsabilidades
+
+- Cámaras IP: RTSP/ONVIF.
+- Servidor Edge: ingest, storage (24–72h), inferencia, WebRTC endpoint, cola de sincronización.
+- Cloud: Auth, Event Service, FCM, TURN/STUN.
+- Clientes: App móvil (WebRTC+FCM), Dashboard web.
+
+---
+
+## Paso 6 — ADRs (decisiones)
+
+- DEC-1: Adoptar Edge–Cloud.
+- DEC-2: Ejecutar IA en Edge.
+- DEC-3: Usar WebRTC + TURN/STUN.
+
+Acción: enlazar ADRs en /docs/adr/ (si existen).
+
+---
+
+## Paso 7 — Pruebas y validación
+
+- SP-1: Latencia LAN (100 muestras).
+- SP-2: Volumen a la nube (1 día simulado, 10 cámaras).
+- SP-3: Desconexión WAN 2h, verificar sincronización < 10 min.
+
+Métricas clave: latencia E2E, MB/hora por cámara, tiempo de sincronización.
+
+---
+
+## Riesgos y mitigaciones
+
+- Capacidad Edge insuficiente → modelos optimizados o aceleradores.
+- WebRTC no cumple en móviles → códecs, fallback HLS.
+- Escalado TURN/STUN → proveedores o dimensionamiento.
+
+---
+
+## Entregables y próximos pasos
+
+- `primer_iteracion.qmd` (documento).
+- ADRs en `/docs/adr/`.
+- Diagrama de despliegue (SVG/PNG).
+- Scripts de prueba: latencia y ancho de banda.
+
+---
+
+## Notas para el presentador
+
+- Mantener las diapositivas concisas. Preparar demo WebRTC si es posible.
+- Incluir resultados de mediciones (latencia/uso de banda) en la demo.
+
+---
+
+<!-- End of presentation template -->
