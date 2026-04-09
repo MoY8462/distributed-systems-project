@@ -146,47 +146,30 @@ La tabla siguiente marca con ✓ (cumple), ~ (parcial) o ✗ (no cumple) cómo c
 ### Diagramas
 <br>
 <div style="text-align:center">
-![Figura 1. Arquitectura Edge Computing](edge.png){fig-cap="Figura 1: Despliegue" width="600px" fig-alt="Diagrama de despliegue"}
+![Figura 1. Arquitectura Edge Computing](image/edge.png){fig-cap="Figura 1: Despliegue" width="600px" fig-alt="Diagrama de despliegue"}
 </div>
 <br>
 <div style="text-align:center">
-![Figura 2. Arquitectura Modelo Vista Vista-Modelo](mvvm.png){fig-cap="Figura 2: Modelo Vista Vista-Modelo" width="600px" fig-alt="Diagrama de modelo vista vista-modelo"}
+![Figura 2. Arquitectura Modelo Vista Vista-Modelo](image/mvvm.png){fig-cap="Figura 2: Modelo Vista Vista-Modelo" width="600px" fig-alt="Diagrama de modelo vista vista-modelo"}
 </div>
 <br>
 <div style="text-align:center">
-![Figura 3. Patrón Single Page Application](spa.png){fig-cap="Figura 3: Patrón Single Page Application" width="350px" fig-alt="Diagrama de patrón Single Page Application"}
+![Figura 3. Patrón Single Page Application](image/spa.png){fig-cap="Figura 3: Patrón Single Page Application" width="350px" fig-alt="Diagrama de patrón Single Page Application"}
 </div>
 
 ### Paso 5: Instanciar elementos arquitectónicos y asignar responsabilidades
-Propósito: Definir, por componente, qué hace, qué guarda, qué expone y cómo se prueba.
 
-Componentes clave y responsabilidades ampliadas:
-- Cámaras IP
-    - Salida: flujo RTSP/ONVIF o stream compatible con NVR.
-    - Pruebas: integridad de frames, latencia de captura.
-- Servidor Edge (NVR/Gateway)
-    - Ingesta: capturar múltiples streams, transcodificar si aplica.
-    - Almacenamiento: retención local configurable (p. ej. 24–72h), gestión de circular buffer.
-    - Inferencia: ejecutar modelos optimizados; exponer API REST local para consultas.
-    - Streaming: endpoint WebRTC para conexión directa con cliente; control de sesiones y permisos.
-    - Sincronización: cola de eventos con confirmación hacia Cloud.
-    - Monitorización: métricas locales (CPU, memoria, I/O, ancho de banda).
-- Cloud (Backend mínimo)
-    - Auth Service: registro/login, roles, emisión de tokens.
-    - Event Service: recepción y almacenamiento de metadatos, API para consulta histórica.
-    - Notificaciones: FCM integradas para push.
-    - TURN/STUN: servicio gestionado para facilitar sesión WebRTC.
-- Clientes
-    - App móvil: consumes BFF, WebRTC client, subscripción FCM.
-    - Dashboard web: administración y visualización de salud.
+En este paso se instanciarán los elementos arquitectónicos seleccionados en Paso 4 y se asignarán responsabilidades, contratos y criterios de prueba para cada componente.
 
-Interfaces y contratos:
-- API local Edge: REST endpoints para control y metadatos; WebRTC for media.
-- BFF: endpoints autenticados y adaptados para móvil/web.
+<br>
+<div style="text-align:center">
+![Figura 4. Patrón SPA Instanciado](image/ins_spa.png){fig-cap="Figura 4: Patrón SPA Instanciado" width="700px" fig-alt="Diagrama de patrón Single Page Application Instanciado"}
+</div>
 
-Pruebas por componente:
-- Edge: pruebas de carga para N cámaras simuladas, latencia E2E.
-- Cloud: pruebas de encolado y persistencia de eventos.
+<br>
+<div style="text-align:center">
+![Figura 5. Patrón MVVM Instanciado](image/ins_mvvm.png){fig-cap="Figura 5: Patrón MVVM Instanciado" width="700px" fig-alt="Diagrama de patrón MVVM Instanciado"}
+</div>
 
 ---
 
