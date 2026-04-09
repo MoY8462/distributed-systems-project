@@ -1,3 +1,19 @@
+---
+title: "Iteración 1 — Arquitectura de software de referencia para el desarrollo de sistemas de videovigilancia inteligentes"
+subtitle: "Maestría en Ciencias de la Computación — Sistemas Distribuidos Móviles y Ubicuos"
+author:
+  - name: "Moisés Alejandro Sánchez Vergara"
+  - name: "Edgar Tobón Sosa"
+date: "2026-04-07"
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    theme: cosmo
+lang: es
+---
+
+
 La **Iteración 1** en ADD 3.0 tiene como objetivo principal establecer la estructura general del sistema (marco de referencia arquitectónico) resolviendo los *drivers* más críticos del negocio. Esta versión preserva la organización original por pasos y amplía cada uno con actividades, decisiones, criterios testables y entregables.
 
 ---
@@ -159,92 +175,119 @@ La tabla siguiente marca con ✓ (cumple), ~ (parcial) o ✗ (no cumple) cómo c
 
 ### Paso 5: Instanciar elementos arquitectónicos y asignar responsabilidades
 
-En este paso se instanciarán los elementos arquitectónicos seleccionados en Paso 4 y se asignarán responsabilidades, contratos y criterios de prueba para cada componente.
 
-<br>
-<div style="text-align:center">
-![Figura 4. Patrón SPA Instanciado](image/ins_spa.png){fig-cap="Figura 4: Patrón SPA Instanciado" width="700px" fig-alt="Diagrama de patrón Single Page Application Instanciado"}
-</div>
+| Módulo / Elemento Instanciado | Responsabilidades Asignadas | Origen (Concepto de Diseño) |
+| :--- | :------ | :--- |
+| **Servidor NVR / Nodo Edge** | • **Ingesta de Video:** Capturar y procesar de forma continua el flujo RTSP de las cámaras locales.<br>• **Procesamiento AI Local:** Ejecutar los modelos de visión computacional para la detección de anomalías en tiempo real sin enviar video a la nube.<br>• **Store-and-Forward:** Sincronización selectiva en la nube. | Edge Computing |
+| **API Gateway Central** | • **Punto de Entrada Único:** Recibir absolutamente todas las peticiones entrantes desde la App Móvil y el Dashboard Web.<br>• **Enrutamiento:** Redirigir la petición al microservicio interno correspondiente (Dispositivos, Eventos, Notificaciones). | API Gateway |
+| **Servicio de Identidad (Auth)** | **Validación Stateless:** Verificar la firma criptográfica de los tokens en cada petición entrante, confirmando roles y permisos sin necesidad de consultar la base de datos o guardar sesiones en la memoria del servidor. | Autenticación Stateless |
+| **Cliente Móvil (Capas View, ViewModel, Model)** | • **Capa Repository:** Se encarga de gestionar la lógica de acceso a datos y comunicación con el Nodo Edge. | Arquitectura MVVM |
+| **Dashboard Web (Router, State Store, Componentes)** | • **Router Cliente:** Manejar la navegación entre pantallas (Panel de salud, visualización, usuarios) sin recargar la página en el navegador.<br>• **State Store:** Mantener en memoria RAM del navegador el estado "en vivo" de los Nodos Edge (Online/Offline) para no saturar el servidor con peticiones redundantes.<br>• **Componentes UI:** Renderizar los *videowalls* reactivos que se actualizan automáticamente ante cambios en el Store global. | Patrón SPA (Single Page Application) |
 
-<br>
-<div style="text-align:center">
-![Figura 5. Patrón MVVM Instanciado](image/ins_mvvm.png){fig-cap="Figura 5: Patrón MVVM Instanciado" width="700px" fig-alt="Diagrama de patrón MVVM Instanciado"}
-</div>
+
 
 ---
 
 ### Paso 6: Bosquejar vistas y registrar decisiones (ADR)
-Propósito: Formalizar las decisiones arquitectónicas y justificar trade-offs.
 
-Formato mínimo ADR por decisión:
-- ID: DEC-X
-- Contexto: problema que motiva la decisión.
-- Decisión: qué se adopta.
-- Consecuencias: impacto positivo y negativo.
-- Alternativas consideradas.
+### Edge Computing 
 
-Ejemplos resumidos:
-- DEC-1: Adoptar Edge–Cloud (contexto: reducir tráfico y tolerar desconexiones).
-- DEC-2: Ejecutar IA en Edge (contexto: reducir falsos positivos y latencia).
-- DEC-3: WebRTC + TURN/STUN (contexto: latencia y NAT traversal).
+| Elemento | Descripción / Responsabilidades |
+| :--- | :----- |
+| **Device Layer** | Captura los datos con la cámara de videovigilancia y se comunica con la capa Edge. |
+| **Edge Layer** | Recolecta la información de las cámaras de videovigilancia en tiempo real y se comunica con la capa Cloud |
+| **Cloud Layer** | Almacena y procesa los datos recibidos desde la capa Edge, proporcionando servicios centralizados y análisis avanzados. |
+| **Videocamara y sensores** | Se encargan de capturar la información en tiempo real para transmitir la información a la capa Edge. |
+| **IA** | Se encarga de realizar el procesamiento de la información para el reconocmiento de personas. |
+| **Streaming** | Expone el endpoint para poder visualizar en tiempo real el video de las cámaras de videovigilancia. |
+| **Store and Foreward** | Se encarga de persisitir las grabaciones y sinconizar la información selectiva hacia la capa Cloud. |
+| **Almacenamiento** | Persiste en la nube la información selectiva y el Dashboard para gestionar el sistema. |
+| **Eventos y alertas** | Esta capa se encarga de enviar notificaciones hacia la aplicación móvil. |
+| **API Gateway** | Actua como punto de entrada único, recibiendo las solicitudes de entrada web y móbil |
+| **Autenticación Stateless** | Método de autenticación. |
+| **Spa (Dashboard)** | Aplicación multiplataforma para gestión del sistema. |
+| **App móvil** | Aplicación móvil para monitoreo del sistema de videovigilancia. |
 
-Salida:
-- Colección de ADRs en /docs/adr/ con referencias a UC y QA.
+<br>
+<div style="text-align:center">
+![Figura 4. Arquitectura Edge Computing instanciada](image/ins_edge.png){fig-cap="Figura 4: Arquitectura Edge Computing instanciada" width="800px" fig-alt="Diagrama de arquitectura Edge Computing instanciada"}
+</div>
+<br>
+
+### MVVM
+
+| Elemento | Descripción |
+| :--- | :--- |
+| **View (UI)** | Interfaz que renderiza video, controles y alertas. |
+| **ViewModel** | Orquesta estado reactivo, reconexiones y coordina repositorios. |
+| **Repositories** / Model | Acceso y persistencia local (DB, cache y cola Store-and-Forward); sincronización con BFF y manejo de datos offline. |
+| **API Gateway** | Maneja tokens, refresh y permisos; almacenamiento seguro de credenciales y aplicación de políticas de acceso. |
+| **Notificaciones** | Se recibe notificación cuando el sistema de alertamiento las arroja. |
+
+<br>
+<div style="text-align:center">
+![Figura 5. Patrón SPA Instanciado](image/ins_spa.png){fig-cap="Figura 5: Patrón SPA Instanciado" width="700px" fig-alt="Diagrama de patrón Single Page Application Instanciado"}
+</div>
+<br>
+
+### SPA 
+
+| Elemento | Descripción |
+| :--- | :--- |
+| Router (Client-side) | Maneja navegación sin recargas, protección de rutas y carga diferida de módulos. |
+| State Store (Global) | Mantiene el estado en vivo (health, sesiones, videowalls) y sincroniza con BFF mediante sockets/streaming. |
+| UI Components / Videowalls | Componentes reutilizables para renderizar streams y controles, con fallback y optimizaciones de rendimiento. |
+| API Client / BFF Consumer | Orquesta llamadas al BFF, caching y políticas de retry/backoff; alimenta el State Store. |
+| Auth / Session Management | Valida y renueva tokens en cliente, aplica roles y maneja expiraciones de forma segura. |
+
+<br>
+<div style="text-align:center">
+![Figura 6. Patrón MVVM Instanciado](image/ins_mvvm.png){fig-cap="Figura 6: Patrón MVVM Instanciado" width="700px" fig-alt="Diagrama de patrón MVVM Instanciado"}
+</div>
+<br>
 
 ---
 
 ### Paso 7: Analizar el diseño respecto al objetivo y definir pruebas
-Propósito: Verificar que las decisiones cumplen los objetivos y definir cómo probarlo.
 
-Actividades:
-- Definir escenarios de prueba para cada criterio de aceptación.
-- Crear scripts/sensores para medir latencia y consumo de banda.
-- Definir umbrales de éxito y summar report.
+**Objetivo inicial de la iteración:** Establecer la estructura física y lógica general del sistema (Arquitectura Base) para soportar streaming de ultra baja latencia, procesamiento preventivo y operación resiliente ante caídas de red, cumpliendo con las restricciones tecnológicas del equipo.
 
-Escenarios de prueba (ejemplos):
-- SP-1 (Latencia LAN): Cliente móvil en LAN se conecta a Edge via WebRTC; medir E2E 100 muestras.
-- SP-2 (Uso normal vs evento): Simular 10 cámaras; medir volumen enviado a Cloud en operación continua vs solo eventos (1 día).
-- SP-3 (Desconexión): Cortar WAN por 2 horas; verificar grabación local continúa y sincronización en < 10 minutos tras restablecer.
+**Resultado de la evaluación:** El objetivo se **cumplió satisfactoriamente**. La decisión de adoptar una arquitectura Edge-Cloud estructurada delegó la carga pesada al borde de la red, resolviendo de raíz el problema de saturación y los costos de nube, mientras que la introducción de WebRTC garantizó el cumplimiento de las metas de rendimiento.
 
-Resultados esperados y métricas:
-- Latencia E2E < 500 ms en 90% de muestras (SP-1).
-- Volumen a la nube < 10% del video total (SP-2).
-- Sincronización de eventos críticos < 10 minutos (SP-3).
+<br>
 
-Riesgos transversales y mitigaciones (resumen):
-- Capacidad Edge insuficiente → modelos optimizados, aceleradores.
-- WebRTC no cumple en condiciones móviles reales → ajustes de códec, fallback HLS.
-- Escalado de TURN/STUN → plan de dimensionamiento y uso de proveedores.
-
-Entregables finales de la iteración:
-- Documento `primer_iteracion.qmd` (actualizado, con pasos detallados).
-- ADRs en `/docs/adr/`.
-- Diagrama de despliegue y flujo de datos.
-- Scripts de prueba para latencia y ancho de banda (básico).
-
-### Tablas de alternativas descartadas
-
-**Alternativas descartadas para la Arquitectura física (Edge–Cloud)**
-
-| Alternativa | Razón para descartar |
-| :--- | :--- |
-| Arquitectura puramente Cloud (Nube centralizada) | Transmitir video de alta resolución 24/7 desde decenas de cámaras a la nube saturaría el ancho de banda del cliente y generaría costos de almacenamiento exorbitantes; vulnera QA-9 y QA-5. |
-
-**Alternativas descartadas para la arquitectura del servidor**
-
-| Alternativa | Razón para descartar |
-| :--- | :--- |
-| Arquitectura Monolítica | Más simple para iniciar, pero dificulta escalar independientemente servicios críticos (streaming, notificaciones, IA), comprometiendo rendimiento y flexibilidad futura. |
-
-**Alternativas descartadas para la arquitectura cliente**
-
-| Alternativa | Razón para descartar |
-| :--- | :--- |
-| Aplicación de Cliente Rico (Desktop) | Requiere instalación local, contradice el acceso ágil y remoto vía navegadores web multiplataforma (CON-2). |
-
-**Alternativas descartadas para la capa de comunicación**
-
-| Alternativa | Razón para descartar |
-| :--- | :--- |
-| HLS (HTTP Live Streaming) | Introduce latencias de 3–10s por segmentación, incumpliendo el requisito de latencia crítica (QA-1). |
-
+| Not addressed | Partially addressed | Completely addressed | Design decisions made during the iteration |
+| :---: | :---: | :---: | :----- |
+| | **UC-1** | |La arquitectura de referencia seleccionada soporta está funcionalidad |
+| | **UC-2** | | La arquitectura de referencia seleccionada soporta está funcionalidad |
+| | **UC-3** | | La arquitectura de referencia seleccionada soporta está funcionalidad |
+| **UC-4** | | | No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.|
+| **UC-5** | | | No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.|
+| | **UC-6** | | La arquitectura de referencia seleccionada soporta está funcionalidad. |
+| **UC-7** | | | No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.|
+| | **UC-8** | | La arquitectura de referencia seleccionada soporta está funcionalidad. |
+| **UC-9** | | | No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.|
+| | **UC-10** | | La arquitectura de referencia seleccionada soporta está funcionalidad. |
+| | **UC-11** | | La arquitectura de referencia seleccionada soporta está funcionalidad. |
+| **UC-12** | | | No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.|
+| **UC-13** | | | No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.|
+| **UC-14** | | | No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.|
+| | **UC-15** | | La arquitectura de referencia seleccionada soporta está funcionalidad. |
+| | **QA-1** | | La arquitectura de referencia seleccionada soporta está funcionalidad.|
+| **QA-2** | | | No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.|
+| **QA-3** | | | No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.|
+| **QA-4** | | | No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.|
+| | **QA-5** | | La arquitectura de referencia seleccionada soporta está funcionalidad. |
+| | **QA-6** | | La arquitectura de referencia seleccionada soporta está funcionalidad. |
+| | **QA-7** | | La arquitectura de referencia seleccionada soporta está funcionalidad. |
+| **QA-8** | | | No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.|
+| | **QA-9** | | La arquitectura de referencia seleccionada soporta está funcionalidad. |
+| | **QA-10** | | La arquitectura de referencia seleccionada soporta está funcionalidad. |
+| | **QA-11** | | La arquitectura de referencia seleccionada soporta está funcionalidad. |
+| | **CRN-1** | | La estructura general lógica del sistema ha sido establecida, pero la estructura física aún no ha sido definida. |
+| **CRN-2** | | | No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.|
+| | **CRN-3** | | La arquitectura de referencia seleccionada soporta está funcionalidad. |
+| **CRN-4** | | | No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.|
+| **CON-1** | | | No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.|
+| | **CON-2** | | La arquitectura de referencia seleccionada soporta está funcionalidad. |
+| | **CON-3** | | La arquitectura de referencia seleccionada soporta está funcionalidad. |

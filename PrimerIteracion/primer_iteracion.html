@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" xml:lang="es"><head>
 
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.8.27">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Moisés Alejandro Sánchez Vergara">
+<meta name="author" content="Edgar Tobón Sosa">
 
-<title>primer_iteracion</title>
+<title>Iteración 1 — Arquitectura de software de referencia para el desarrollo de sistemas de videovigilancia inteligentes</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -34,18 +36,69 @@ ul.task-list li input[type="checkbox"] {
 <link href="primer_iteracion_files/libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="primer_iteracion_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="primer_iteracion_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="primer_iteracion_files/libs/bootstrap/bootstrap-d6a003b94517c951b2d65075d42fb01b.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="primer_iteracion_files/libs/bootstrap/bootstrap-a74871fe4945b66d259aafc266475145.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 
 
 </head>
 
-<body class="fullcontent quarto-light">
+<body class="quarto-light">
 
 <div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
-
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Tabla de contenidos</h2>
+   
+  <ul>
+  <li><a href="#paso-1-revisar-las-entradas" id="toc-paso-1-revisar-las-entradas" class="nav-link active" data-scroll-target="#paso-1-revisar-las-entradas">Paso 1: Revisar las entradas</a></li>
+  <li><a href="#escenarios-de-atributos-de-calidad" id="toc-escenarios-de-atributos-de-calidad" class="nav-link" data-scroll-target="#escenarios-de-atributos-de-calidad">Escenarios de atributos de calidad</a></li>
+  <li><a href="#paso-2-establecer-el-objetivo-de-la-iteración-selección-de-impulsores" id="toc-paso-2-establecer-el-objetivo-de-la-iteración-selección-de-impulsores" class="nav-link" data-scroll-target="#paso-2-establecer-el-objetivo-de-la-iteración-selección-de-impulsores">Paso 2: Establecer el objetivo de la iteración (selección de impulsores)</a></li>
+  <li><a href="#paso-3-elegir-los-elementos-del-sistema-a-refinar" id="toc-paso-3-elegir-los-elementos-del-sistema-a-refinar" class="nav-link" data-scroll-target="#paso-3-elegir-los-elementos-del-sistema-a-refinar">Paso 3: Elegir los elementos del sistema a refinar</a></li>
+  <li><a href="#paso-4-elegir-los-conceptos-de-diseño" id="toc-paso-4-elegir-los-conceptos-de-diseño" class="nav-link" data-scroll-target="#paso-4-elegir-los-conceptos-de-diseño">Paso 4: Elegir los conceptos de diseño</a></li>
+  <li><a href="#arquitecturas-propuestas-seleccionadas" id="toc-arquitecturas-propuestas-seleccionadas" class="nav-link" data-scroll-target="#arquitecturas-propuestas-seleccionadas">Arquitecturas propuestas seleccionadas</a></li>
+  <li><a href="#arquitecturas-propuestas-no-seleccionadas" id="toc-arquitecturas-propuestas-no-seleccionadas" class="nav-link" data-scroll-target="#arquitecturas-propuestas-no-seleccionadas">Arquitecturas propuestas no seleccionadas</a></li>
+  <li><a href="#diagramas" id="toc-diagramas" class="nav-link" data-scroll-target="#diagramas">Diagramas</a></li>
+  <li><a href="#paso-5-instanciar-elementos-arquitectónicos-y-asignar-responsabilidades" id="toc-paso-5-instanciar-elementos-arquitectónicos-y-asignar-responsabilidades" class="nav-link" data-scroll-target="#paso-5-instanciar-elementos-arquitectónicos-y-asignar-responsabilidades">Paso 5: Instanciar elementos arquitectónicos y asignar responsabilidades</a></li>
+  <li><a href="#paso-6-bosquejar-vistas-y-registrar-decisiones-adr" id="toc-paso-6-bosquejar-vistas-y-registrar-decisiones-adr" class="nav-link" data-scroll-target="#paso-6-bosquejar-vistas-y-registrar-decisiones-adr">Paso 6: Bosquejar vistas y registrar decisiones (ADR)</a></li>
+  <li><a href="#edge-computing" id="toc-edge-computing" class="nav-link" data-scroll-target="#edge-computing">Edge Computing</a></li>
+  <li><a href="#mvvm" id="toc-mvvm" class="nav-link" data-scroll-target="#mvvm">MVVM</a></li>
+  <li><a href="#spa" id="toc-spa" class="nav-link" data-scroll-target="#spa">SPA</a></li>
+  <li><a href="#paso-7-analizar-el-diseño-respecto-al-objetivo-y-definir-pruebas" id="toc-paso-7-analizar-el-diseño-respecto-al-objetivo-y-definir-pruebas" class="nav-link" data-scroll-target="#paso-7-analizar-el-diseño-respecto-al-objetivo-y-definir-pruebas">Paso 7: Analizar el diseño respecto al objetivo y definir pruebas</a></li>
+  </ul>
+</nav>
+</div>
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Iteración 1 — Arquitectura de software de referencia para el desarrollo de sistemas de videovigilancia inteligentes</h1>
+<p class="subtitle lead">Maestría en Ciencias de la Computación — Sistemas Distribuidos Móviles y Ubicuos</p>
+</div>
 
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Autores/as</div>
+    <div class="quarto-title-meta-contents">
+             <p>Moisés Alejandro Sánchez Vergara </p>
+             <p>Edgar Tobón Sosa </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Fecha de publicación</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">7 de abril de 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
 
 
 <p>La <strong>Iteración 1</strong> en ADD 3.0 tiene como objetivo principal establecer la estructura general del sistema (marco de referencia arquitectónico) resolviendo los <em>drivers</em> más críticos del negocio. Esta versión preserva la organización original por pasos y amplía cada uno con actividades, decisiones, criterios testables y entregables.</p>
@@ -401,119 +454,444 @@ La tabla siguiente marca con ✓ (cumple), ~ (parcial) o ✗ (no cumple) cómo c
 </section>
 <section id="paso-5-instanciar-elementos-arquitectónicos-y-asignar-responsabilidades" class="level3">
 <h3 class="anchored" data-anchor-id="paso-5-instanciar-elementos-arquitectónicos-y-asignar-responsabilidades">Paso 5: Instanciar elementos arquitectónicos y asignar responsabilidades</h3>
-<p>En este paso se instanciarán los elementos arquitectónicos seleccionados en Paso 4 y se asignarán responsabilidades, contratos y criterios de prueba para cada componente.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 26%">
+<col style="width: 46%">
+<col style="width: 26%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Módulo / Elemento Instanciado</th>
+<th style="text-align: left;">Responsabilidades Asignadas</th>
+<th style="text-align: left;">Origen (Concepto de Diseño)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Servidor NVR / Nodo Edge</strong></td>
+<td style="text-align: left;">• <strong>Ingesta de Video:</strong> Capturar y procesar de forma continua el flujo RTSP de las cámaras locales.<br>• <strong>Procesamiento AI Local:</strong> Ejecutar los modelos de visión computacional para la detección de anomalías en tiempo real sin enviar video a la nube.<br>• <strong>Store-and-Forward:</strong> Sincronización selectiva en la nube.</td>
+<td style="text-align: left;">Edge Computing</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>API Gateway Central</strong></td>
+<td style="text-align: left;">• <strong>Punto de Entrada Único:</strong> Recibir absolutamente todas las peticiones entrantes desde la App Móvil y el Dashboard Web.<br>• <strong>Enrutamiento:</strong> Redirigir la petición al microservicio interno correspondiente (Dispositivos, Eventos, Notificaciones).</td>
+<td style="text-align: left;">API Gateway</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Servicio de Identidad (Auth)</strong></td>
+<td style="text-align: left;"><strong>Validación Stateless:</strong> Verificar la firma criptográfica de los tokens en cada petición entrante, confirmando roles y permisos sin necesidad de consultar la base de datos o guardar sesiones en la memoria del servidor.</td>
+<td style="text-align: left;">Autenticación Stateless</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Cliente Móvil (Capas View, ViewModel, Model)</strong></td>
+<td style="text-align: left;">• <strong>Capa Repository:</strong> Se encarga de gestionar la lógica de acceso a datos y comunicación con el Nodo Edge.</td>
+<td style="text-align: left;">Arquitectura MVVM</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Dashboard Web (Router, State Store, Componentes)</strong></td>
+<td style="text-align: left;">• <strong>Router Cliente:</strong> Manejar la navegación entre pantallas (Panel de salud, visualización, usuarios) sin recargar la página en el navegador.<br>• <strong>State Store:</strong> Mantener en memoria RAM del navegador el estado “en vivo” de los Nodos Edge (Online/Offline) para no saturar el servidor con peticiones redundantes.<br>• <strong>Componentes UI:</strong> Renderizar los <em>videowalls</em> reactivos que se actualizan automáticamente ante cambios en el Store global.</td>
+<td style="text-align: left;">Patrón SPA (Single Page Application)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="paso-6-bosquejar-vistas-y-registrar-decisiones-adr" class="level3">
+<h3 class="anchored" data-anchor-id="paso-6-bosquejar-vistas-y-registrar-decisiones-adr">Paso 6: Bosquejar vistas y registrar decisiones (ADR)</h3>
+</section>
+<section id="edge-computing" class="level3">
+<h3 class="anchored" data-anchor-id="edge-computing">Edge Computing</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 40%">
+<col style="width: 60%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Elemento</th>
+<th style="text-align: left;">Descripción / Responsabilidades</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Device Layer</strong></td>
+<td style="text-align: left;">Captura los datos con la cámara de videovigilancia y se comunica con la capa Edge.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Edge Layer</strong></td>
+<td style="text-align: left;">Recolecta la información de las cámaras de videovigilancia en tiempo real y se comunica con la capa Cloud</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Cloud Layer</strong></td>
+<td style="text-align: left;">Almacena y procesa los datos recibidos desde la capa Edge, proporcionando servicios centralizados y análisis avanzados.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Videocamara y sensores</strong></td>
+<td style="text-align: left;">Se encargan de capturar la información en tiempo real para transmitir la información a la capa Edge.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>IA</strong></td>
+<td style="text-align: left;">Se encarga de realizar el procesamiento de la información para el reconocmiento de personas.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Streaming</strong></td>
+<td style="text-align: left;">Expone el endpoint para poder visualizar en tiempo real el video de las cámaras de videovigilancia.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Store and Foreward</strong></td>
+<td style="text-align: left;">Se encarga de persisitir las grabaciones y sinconizar la información selectiva hacia la capa Cloud.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Almacenamiento</strong></td>
+<td style="text-align: left;">Persiste en la nube la información selectiva y el Dashboard para gestionar el sistema.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Eventos y alertas</strong></td>
+<td style="text-align: left;">Esta capa se encarga de enviar notificaciones hacia la aplicación móvil.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>API Gateway</strong></td>
+<td style="text-align: left;">Actua como punto de entrada único, recibiendo las solicitudes de entrada web y móbil</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Autenticación Stateless</strong></td>
+<td style="text-align: left;">Método de autenticación.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Spa (Dashboard)</strong></td>
+<td style="text-align: left;">Aplicación multiplataforma para gestión del sistema.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>App móvil</strong></td>
+<td style="text-align: left;">Aplicación móvil para monitoreo del sistema de videovigilancia.</td>
+</tr>
+</tbody>
+</table>
+<br>
+<div style="text-align:center">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="image/ins_edge.png" class="img-fluid figure-img" alt="Diagrama de arquitectura Edge Computing instanciada" width="800"></p>
+<figcaption>Figura 4. Arquitectura Edge Computing instanciada</figcaption>
+</figure>
+</div>
+</div>
+<p><br></p>
+</section>
+<section id="mvvm" class="level3">
+<h3 class="anchored" data-anchor-id="mvvm">MVVM</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Elemento</th>
+<th style="text-align: left;">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>View (UI)</strong></td>
+<td style="text-align: left;">Interfaz que renderiza video, controles y alertas.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>ViewModel</strong></td>
+<td style="text-align: left;">Orquesta estado reactivo, reconexiones y coordina repositorios.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Repositories</strong> / Model</td>
+<td style="text-align: left;">Acceso y persistencia local (DB, cache y cola Store-and-Forward); sincronización con BFF y manejo de datos offline.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>API Gateway</strong></td>
+<td style="text-align: left;">Maneja tokens, refresh y permisos; almacenamiento seguro de credenciales y aplicación de políticas de acceso.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Notificaciones</strong></td>
+<td style="text-align: left;">Se recibe notificación cuando el sistema de alertamiento las arroja.</td>
+</tr>
+</tbody>
+</table>
 <br>
 <div style="text-align:center">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="image/ins_spa.png" class="img-fluid figure-img" alt="Diagrama de patrón Single Page Application Instanciado" width="700"></p>
-<figcaption>Figura 4. Patrón SPA Instanciado</figcaption>
+<figcaption>Figura 5. Patrón SPA Instanciado</figcaption>
 </figure>
 </div>
 </div>
+<p><br></p>
+</section>
+<section id="spa" class="level3">
+<h3 class="anchored" data-anchor-id="spa">SPA</h3>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Elemento</th>
+<th style="text-align: left;">Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Router (Client-side)</td>
+<td style="text-align: left;">Maneja navegación sin recargas, protección de rutas y carga diferida de módulos.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">State Store (Global)</td>
+<td style="text-align: left;">Mantiene el estado en vivo (health, sesiones, videowalls) y sincroniza con BFF mediante sockets/streaming.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">UI Components / Videowalls</td>
+<td style="text-align: left;">Componentes reutilizables para renderizar streams y controles, con fallback y optimizaciones de rendimiento.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">API Client / BFF Consumer</td>
+<td style="text-align: left;">Orquesta llamadas al BFF, caching y políticas de retry/backoff; alimenta el State Store.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Auth / Session Management</td>
+<td style="text-align: left;">Valida y renueva tokens en cliente, aplica roles y maneja expiraciones de forma segura.</td>
+</tr>
+</tbody>
+</table>
 <br>
 <div style="text-align:center">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="image/ins_mvvm.png" class="img-fluid figure-img" alt="Diagrama de patrón MVVM Instanciado" width="700"></p>
-<figcaption>Figura 5. Patrón MVVM Instanciado</figcaption>
+<figcaption>Figura 6. Patrón MVVM Instanciado</figcaption>
 </figure>
 </div>
 </div>
-<hr>
-</section>
-<section id="paso-6-bosquejar-vistas-y-registrar-decisiones-adr" class="level3">
-<h3 class="anchored" data-anchor-id="paso-6-bosquejar-vistas-y-registrar-decisiones-adr">Paso 6: Bosquejar vistas y registrar decisiones (ADR)</h3>
-<p>Propósito: Formalizar las decisiones arquitectónicas y justificar trade-offs.</p>
-<p>Formato mínimo ADR por decisión: - ID: DEC-X - Contexto: problema que motiva la decisión. - Decisión: qué se adopta. - Consecuencias: impacto positivo y negativo. - Alternativas consideradas.</p>
-<p>Ejemplos resumidos: - DEC-1: Adoptar Edge–Cloud (contexto: reducir tráfico y tolerar desconexiones). - DEC-2: Ejecutar IA en Edge (contexto: reducir falsos positivos y latencia). - DEC-3: WebRTC + TURN/STUN (contexto: latencia y NAT traversal).</p>
-<p>Salida: - Colección de ADRs en /docs/adr/ con referencias a UC y QA.</p>
+<p><br></p>
 <hr>
 </section>
 <section id="paso-7-analizar-el-diseño-respecto-al-objetivo-y-definir-pruebas" class="level3">
 <h3 class="anchored" data-anchor-id="paso-7-analizar-el-diseño-respecto-al-objetivo-y-definir-pruebas">Paso 7: Analizar el diseño respecto al objetivo y definir pruebas</h3>
-<p>Propósito: Verificar que las decisiones cumplen los objetivos y definir cómo probarlo.</p>
-<p>Actividades: - Definir escenarios de prueba para cada criterio de aceptación. - Crear scripts/sensores para medir latencia y consumo de banda. - Definir umbrales de éxito y summar report.</p>
-<p>Escenarios de prueba (ejemplos): - SP-1 (Latencia LAN): Cliente móvil en LAN se conecta a Edge via WebRTC; medir E2E 100 muestras. - SP-2 (Uso normal vs evento): Simular 10 cámaras; medir volumen enviado a Cloud en operación continua vs solo eventos (1 día). - SP-3 (Desconexión): Cortar WAN por 2 horas; verificar grabación local continúa y sincronización en &lt; 10 minutos tras restablecer.</p>
-<p>Resultados esperados y métricas: - Latencia E2E &lt; 500 ms en 90% de muestras (SP-1). - Volumen a la nube &lt; 10% del video total (SP-2). - Sincronización de eventos críticos &lt; 10 minutos (SP-3).</p>
-<p>Riesgos transversales y mitigaciones (resumen): - Capacidad Edge insuficiente → modelos optimizados, aceleradores. - WebRTC no cumple en condiciones móviles reales → ajustes de códec, fallback HLS. - Escalado de TURN/STUN → plan de dimensionamiento y uso de proveedores.</p>
-<p>Entregables finales de la iteración: - Documento <code>primer_iteracion.qmd</code> (actualizado, con pasos detallados). - ADRs en <code>/docs/adr/</code>. - Diagrama de despliegue y flujo de datos. - Scripts de prueba para latencia y ancho de banda (básico).</p>
-</section>
-<section id="tablas-de-alternativas-descartadas" class="level3">
-<h3 class="anchored" data-anchor-id="tablas-de-alternativas-descartadas">Tablas de alternativas descartadas</h3>
-<p><strong>Alternativas descartadas para la Arquitectura física (Edge–Cloud)</strong></p>
+<p><strong>Objetivo inicial de la iteración:</strong> Establecer la estructura física y lógica general del sistema (Arquitectura Base) para soportar streaming de ultra baja latencia, procesamiento preventivo y operación resiliente ante caídas de red, cumpliendo con las restricciones tecnológicas del equipo.</p>
+<p><strong>Resultado de la evaluación:</strong> El objetivo se <strong>cumplió satisfactoriamente</strong>. La decisión de adoptar una arquitectura Edge-Cloud estructurada delegó la carga pesada al borde de la red, resolviendo de raíz el problema de saturación y los costos de nube, mientras que la introducción de WebRTC garantizó el cumplimiento de las metas de rendimiento.</p>
+<p><br></p>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
+<col style="width: 23%">
+<col style="width: 23%">
+<col style="width: 23%">
+<col style="width: 28%">
 </colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: left;">Alternativa</th>
-<th style="text-align: left;">Razón para descartar</th>
+<th style="text-align: center;">Not addressed</th>
+<th style="text-align: center;">Partially addressed</th>
+<th style="text-align: center;">Completely addressed</th>
+<th style="text-align: left;">Design decisions made during the iteration</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">Arquitectura puramente Cloud (Nube centralizada)</td>
-<td style="text-align: left;">Transmitir video de alta resolución 24/7 desde decenas de cámaras a la nube saturaría el ancho de banda del cliente y generaría costos de almacenamiento exorbitantes; vulnera QA-9 y QA-5.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>UC-1</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">La arquitectura de referencia seleccionada soporta está funcionalidad</td>
 </tr>
-</tbody>
-</table>
-<p><strong>Alternativas descartadas para la arquitectura del servidor</strong></p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">Alternativa</th>
-<th style="text-align: left;">Razón para descartar</th>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>UC-2</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">La arquitectura de referencia seleccionada soporta está funcionalidad</td>
 </tr>
-</thead>
-<tbody>
 <tr class="odd">
-<td style="text-align: left;">Arquitectura Monolítica</td>
-<td style="text-align: left;">Más simple para iniciar, pero dificulta escalar independientemente servicios críticos (streaming, notificaciones, IA), comprometiendo rendimiento y flexibilidad futura.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>UC-3</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">La arquitectura de referencia seleccionada soporta está funcionalidad</td>
 </tr>
-</tbody>
-</table>
-<p><strong>Alternativas descartadas para la arquitectura cliente</strong></p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">Alternativa</th>
-<th style="text-align: left;">Razón para descartar</th>
+<tr class="even">
+<td style="text-align: center;"><strong>UC-4</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.</td>
 </tr>
-</thead>
-<tbody>
 <tr class="odd">
-<td style="text-align: left;">Aplicación de Cliente Rico (Desktop)</td>
-<td style="text-align: left;">Requiere instalación local, contradice el acceso ágil y remoto vía navegadores web multiplataforma (CON-2).</td>
+<td style="text-align: center;"><strong>UC-5</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.</td>
 </tr>
-</tbody>
-</table>
-<p><strong>Alternativas descartadas para la capa de comunicación</strong></p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th style="text-align: left;">Alternativa</th>
-<th style="text-align: left;">Razón para descartar</th>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>UC-6</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">La arquitectura de referencia seleccionada soporta está funcionalidad.</td>
 </tr>
-</thead>
-<tbody>
 <tr class="odd">
-<td style="text-align: left;">HLS (HTTP Live Streaming)</td>
-<td style="text-align: left;">Introduce latencias de 3–10s por segmentación, incumpliendo el requisito de latencia crítica (QA-1).</td>
+<td style="text-align: center;"><strong>UC-7</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>UC-8</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">La arquitectura de referencia seleccionada soporta está funcionalidad.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>UC-9</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>UC-10</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">La arquitectura de referencia seleccionada soporta está funcionalidad.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>UC-11</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">La arquitectura de referencia seleccionada soporta está funcionalidad.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>UC-12</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>UC-13</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>UC-14</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>UC-15</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">La arquitectura de referencia seleccionada soporta está funcionalidad.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>QA-1</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">La arquitectura de referencia seleccionada soporta está funcionalidad.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>QA-2</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>QA-3</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>QA-4</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>QA-5</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">La arquitectura de referencia seleccionada soporta está funcionalidad.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>QA-6</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">La arquitectura de referencia seleccionada soporta está funcionalidad.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>QA-7</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">La arquitectura de referencia seleccionada soporta está funcionalidad.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>QA-8</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>QA-9</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">La arquitectura de referencia seleccionada soporta está funcionalidad.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>QA-10</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">La arquitectura de referencia seleccionada soporta está funcionalidad.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>QA-11</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">La arquitectura de referencia seleccionada soporta está funcionalidad.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>CRN-1</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">La estructura general lógica del sistema ha sido establecida, pero la estructura física aún no ha sido definida.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>CRN-2</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>CRN-3</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">La arquitectura de referencia seleccionada soporta está funcionalidad.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><strong>CRN-4</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><strong>CON-1</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>CON-2</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">La arquitectura de referencia seleccionada soporta está funcionalidad.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>CON-3</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: left;">La arquitectura de referencia seleccionada soporta está funcionalidad.</td>
 </tr>
 </tbody>
 </table>
@@ -546,12 +924,12 @@ La tabla siguiente marca con ✓ (cumple), ~ (parcial) o ✗ (no cumple) cómo c
       // flash "checked"
       button.classList.add('code-copy-button-checked');
       var currentTitle = button.getAttribute("title");
-      button.setAttribute("title", "Copied!");
+      button.setAttribute("title", "Copiado");
       let tooltip;
       if (window.bootstrap) {
         button.setAttribute("data-bs-toggle", "tooltip");
         button.setAttribute("data-bs-placement", "left");
-        button.setAttribute("data-bs-title", "Copied!");
+        button.setAttribute("data-bs-title", "Copiado");
         tooltip = new bootstrap.Tooltip(button, 
           { trigger: "manual", 
             customClass: "code-copy-button-tooltip",
