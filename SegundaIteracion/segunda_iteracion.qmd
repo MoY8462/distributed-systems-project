@@ -1,22 +1,41 @@
 ---
-title: "Iteración 1 — Arquitectura de software de referencia para el desarrollo de sistemas de videovigilancia inteligentes"
-subtitle: "Maestría en Ciencias de la Computación — Sistemas Distribuidos Móviles y Ubicuos"
-author:
-  - name: "Moisés Alejandro Sánchez Vergara"
-  - name: "Edgar Tobón Sosa"
-date: "2026-04-07"
+title: "Sistemas Distribuidos Móviles y Ubicuos"
 format:
-  html:
-    toc: true
-    toc-depth: 4
-    theme: cosmo
-lang: es
+  pdf:
+    documentclass: article
+    include-in-header: |
+        \usepackage[left=0.5cm,right=0.5cm,top=0.5cm,bottom=0.5cm]{geometry}
+        \usepackage{titling}
+        \pretitle{\vspace*{1.5cm}\begin{center}\Huge\bfseries}
+        \posttitle{\end{center}\vspace{0.6cm}}
+        \preauthor{\begin{center}\large}
+        \postauthor{\end{center}\vspace{0.4cm}}
 ---
 
+\thispagestyle{empty}
+\begin{center}
+\textsc{Centro de Investigación y de Estudios Avanzados}\\[0.5cm]
+\textsc{Maestría en Ciencias de la Computación}\\[2cm]
+\begin{center}
+\huge\bfseries Arquitectura de software de referencia para el desarrollo de sistemas de videovigilancia inteligentes
+\end{center}
+
+\vspace{2cm}
+{\Large \textbf{Alumnos}}\\[0.3cm]
+{\normalsize \textbf{Moisés Alejandro Sánchez Vergara}}\\[0.3cm]
+{\normalsize \textbf{Edgar Tobón Sosa}}\\[0.5cm]
+{\Large \textbf{Profesor}}\\[0.3cm]
+{\normalsize \textbf{Dr. Eduardo López Domínguez}}\\[2cm]
+14 de abril 2026
+\end{center}
+
+\newpage
+
+# Iteración 1: Establecer la arquitectura base
 
 La **Iteración 1** en ADD 3.0 tiene como objetivo principal establecer la estructura general del sistema (marco de referencia arquitectónico) resolviendo los *drivers* más críticos del negocio. Esta versión preserva la organización original por pasos y amplía cada uno con actividades, decisiones, criterios testables y entregables.
 
----
+
 
 ### Paso 1: Revisar las entradas
 Propósito: Consolidar requisitos, casos de uso, atributos de calidad y restricciones que guiarán el diseño.
@@ -66,35 +85,13 @@ Está primera iteración de un sistema greenfield, el propósito es establecer l
 - **CON-3**: Consumo remoto de bases
 
 
----
-
 ### Paso 3: Elegir los elementos del sistema a refinar
 
 Debido a que estamos trabajando un sistema greenfield en la primer iteración, el elemento a refinar es el sistema completo.
 
----
+
 
 ### Paso 4: Elegir los conceptos de diseño
-<!--
-**Arquitecturas de referencia consideradas**
-
-- **Edge–Cloud (Edge Computing):** Procesamiento local en un nodo Edge para reducir tráfico a la nube, mejorar latencias y permitir funcionamiento autónomo durante cortes de WAN. Trade-off: mayor complejidad en despliegue y gestión de dispositivos, necesidad de almacenamiento y cómputo local.
-- **Hub-and-Spoke (Núcleo centralizado con nodos remotos):** Un hub central gestiona control, almacenamiento y coordinación mientras los spokes (Edge/NVR) se conectan a él. Bueno para administración centralizada y consistencia; trade-off: el hub puede convertirse en cuello de botella y punto único de fallo si no se diseñan redundancias.
-- **API Gateway / BFF (Backend-for-Frontend):** Capa unificada de entrada que centraliza autenticación, límites de tasa, agregación y adaptación de APIs para clientes móvil/web. Facilita seguridad y evolución de APIs; trade-off: necesita dimensionamiento y alta disponibilidad.
-- **Microservicios + Service Mesh:** Servicios desacoplados por dominio con mesh para observabilidad, resiliencia y comunicación segura (mTLS). Escala bien y permite despliegues independientes; trade-off: mayor complejidad operativa y necesidad de experiencia en orquestación.
-- **Event-Driven (Broker/Event Sourcing):** Comunicaciones basadas en eventos para desacoplar productores/consumidores (p.ej. Kafka, RabbitMQ). Ideal para sincronización eventual y procesamiento asíncrono; trade-off: modelo mental distinto, latencia eventual y complejidad en garantías de entrega.
-- **Serverless / FaaS (Cloud Functions) para ciertos back-ends:** Útil para endpoints esporádicos o procesamiento on-demand (notificaciones, transformaciones). Reduce costos operativos en burst; trade-off: límites de ejecución y frío inicial en cargas continuas de streaming.
-- **Monolito modular (MVP rápido):** Aplicación monolítica bien modularizada para acelerar PoC; trade-off: re-arquitecturar luego si se requieren escalados finos.
-- **Arquitectura híbrida (Edge + Cloud + CDN/Tiers):** Combinación de patrones arriba para balancear latencia, coste y operabilidad: Edge para IA y grabación local; Cloud para orquestación, analítica histórica y backups.
-- **Aplicación nativa con patrón MVVM (referencia arquitectónica):** separación clara entre Vista, Presentación y Modelo; optimizada para rendimiento y control del ciclo de vida. Pros: mejor control de rendimiento y UX; Cons: mayor esfuerzo de mantenimiento por plataforma.
-- **Cliente ligero (thin client) con procesamiento fuera del dispositivo:** la aplicación actúa principalmente como interfaz y visualizador; procesamiento/IA se realiza en Edge/Cloud. Pros: actualizaciones de lógica fuera del dispositivo; Cons: dependencia de conectividad y latencia.
-- **PWA (Progressive Web App) para dashboard:** habilitar capacidades offline-limitadas y mejoras de responsividad e instalabilidad. Pros: offline resiliente y mejor UX móvil; Cons: no siempre necesario para administradores y añade complejidad.
-- **Composición de widgets/embebidos (dashboard as a shell):** Shell que carga widgets autónomos (pueden ser micro-frontends o iframes controlados) para permitir extensibilidad del ecosistema. Pros: extensible y multitenant; Cons: orquestación de comunicaciones y seguridad entre widgets.
-
-- **Autenticación Stateless:** Modelo de autenticación basado en tokens firmados (p. ej. JWT/OAuth2 bearer) donde el servidor no mantiene estado de sesión; permite escalado horizontal de la capa de autenticación y simplifica integración con API Gateway/BFF. Trade-offs: requiere cuidado en caducidad/refresh, revocación y rotación de claves.
-
-- **Store-and-Forward (Almacenamiento y reenvío):** Patrón en el que un nodo intermedio (p. ej. Edge/NVR) almacena temporalmente datos/ eventos cuando la conectividad hacia la nube está degradada y los reenvía cuando la conexión se restablece. Ideal para garantizar disponibilidad local y minimizar tráfico a la nube; trade-offs: requiere mecanismos de persistencia, deduplicación y resolución de conflictos al sincronizar.
--->
 
 ### Arquitecturas propuestas seleccionadas
 
@@ -138,26 +135,6 @@ Debido a que estamos trabajando un sistema greenfield en la primer iteración, e
 | Streaming/reactive client (móvil) | Cumple QA-1 pero implica mayor esfuerzo de pruebas y control de recursos; se puede incorporar como mejora del cliente en la misma iteración si deciden priorizarlo. |
 | Shell + plugins (móvil) | Extensible y adaptativo, pero añade complejidad de seguridad y compatibilidad que queda para futuras iteraciones. |
 
-<!--
-La tabla siguiente marca con ✓ (cumple), ~ (parcial) o ✗ (no cumple) cómo cada arquitectura propuesta contribuye a los drivers de la iteración inicial.
-
-| Arquitectura / Patrón | QA-1 | QA-5 | QA-9 | QA-10 | CON-1 | CON-2 | CON-3 | Comentario |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| Hub-and-Spoke | ~ | ~ | ~ | ~ | ✗ | ✗ | ~ | Centralización facilita control, pero puede afectar latencia y disponibilidad sin redundancia. |
-| Microservicios + Service Mesh | ~ | ✓ | ~ | ✓ | ✗ | ✗ | ~ | Escala resiliente y seguridad; overhead operativo. |
-| Event-Driven | ~ | ✓ | ✓ | ~ | ✗ | ✗ | ~ | Reduce tráfico síncrono y mejora desacoplo; introduce eventual consistency. |
-| Serverless / FaaS | ✗ | ~ | ~ | ~ | ✗ | ✗ | ~ | Adecuado para cargas event-driven, no para streaming con QA-1. |
-| Monolito modular | ~ | ~ | ~ | ~ | ✗ | ✗ | ~ | Rápido para PoC, limitado para drivers críticos de latencia/disponibilidad. |
-| SSR (dashboard) | ~ | ~ | ~ | ~ | ✗ | ✓ | ~ | Mejora primer paint (UX), pero no impacta latencia de video ni disponibilidad Edge. |
-| PWA (dashboard) | ~ | ✓ | ~ | ~ | ✗ | ✓ | ~ | Ofrece offline parcial y mejor experiencia móvil; no prioritaria. |
-| Micro-frontends | ~ | ~ | ~ | ~ | ✗ | ✓ | ~ | Facilita despliegue por equipo; no resuelve latencia por sí misma. |
-| Widgets / Shell | ~ | ~ | ~ | ~ | ✗ | ✓ | ~ | Extensible, pero requiere trabajo de integración/seguridad. |
-| Thin client (móvil) | ✗ | ✗ | ✗ | ~ | ✓ | ✗ | ✓ | Depende de Edge/Cloud; riesgo sobre QA-1. |
-| Local-first / Offline-first (móvil) | ~ | ✓ | ✓ | ~ | ✓ | ✗ | ✓ | Resiliente a desconexiones; complejidad en sincronización. |
-| Feature modules (móvil) | ~ | ~ | ~ | ~ | ✓ | ✗ | ~ | Mejora organización/entrega pero no es una solución arquitectónica principal. |
-| Streaming/reactive client (móvil) | ✓ | ~ | ~ | ~ | ✓ | ✗ | ~ | Cumple QA-1; requiere esfuerzo en pruebas y optimización. |
-| Shell + plugins (móvil) | ~ | ~ | ~ | ~ | ✓ | ✗ | ~ | Extensible, futura opción para ecosistema de capacidades.
--->
 
 ### Diagramas
 <br>
@@ -184,9 +161,6 @@ La tabla siguiente marca con ✓ (cumple), ~ (parcial) o ✗ (no cumple) cómo c
 | **Cliente Móvil (Capas View, ViewModel, Model)** | • **Capa Repository:** Se encarga de gestionar la lógica de acceso a datos y comunicación con el Nodo Edge. | Arquitectura MVVM |
 | **Dashboard Web (Router, State Store, Componentes)** | • **Router Cliente:** Manejar la navegación entre pantallas (Panel de salud, visualización, usuarios) sin recargar la página en el navegador.<br>• **State Store:** Mantener en memoria RAM del navegador el estado "en vivo" de los Nodos Edge (Online/Offline) para no saturar el servidor con peticiones redundantes.<br>• **Componentes UI:** Renderizar los *videowalls* reactivos que se actualizan automáticamente ante cambios en el Store global. | Patrón SPA (Single Page Application) |
 
-
-
----
 
 ### Paso 6: Bosquejar vistas y registrar decisiones (ADR)
 
@@ -226,7 +200,7 @@ La tabla siguiente marca con ✓ (cumple), ~ (parcial) o ✗ (no cumple) cómo c
 
 <br>
 <div style="text-align:center">
-![Patrón SPA Instanciado](../image/ins_spa.png){width="500px" fig-alt="Diagrama de patrón Single Page Application Instanciado"}
+![Patrón MVVM Instanciado](../image/ins_mvvm.png){width="500px" fig-alt="Diagrama de patrón MVVM Instanciado"}
 </div>
 <br>
 
@@ -242,11 +216,9 @@ La tabla siguiente marca con ✓ (cumple), ~ (parcial) o ✗ (no cumple) cómo c
 
 <br>
 <div style="text-align:center">
-![Patrón MVVM Instanciado](../image/ins_mvvm.png){width="500px" fig-alt="Diagrama de patrón MVVM Instanciado"}
+![Patrón SPA Instanciado](../image/ins_spa.png){width="500px" fig-alt="Diagrama de patrón Single Page Application Instanciado"}
 </div>
 <br>
-
----
 
 ### Paso 7: Analizar el diseño respecto al objetivo y definir pruebas
 
@@ -291,3 +263,137 @@ La tabla siguiente marca con ✓ (cumple), ~ (parcial) o ✗ (no cumple) cómo c
 | **CON-1** | | | No se tomaron decisiones relevantes, ya que es necesario identificar los elementos que participan en el caso de uso asociado al escenario.|
 | | **CON-2** | | La arquitectura de referencia seleccionada soporta está funcionalidad. |
 | | **CON-3** | | La arquitectura de referencia seleccionada soporta está funcionalidad. |
+
+
+
+\newpage
+
+# Iteración 2: Refinar la arquitectura para soportar nuevos drivers
+
+### Paso 2: Establecer el objetivo de la iteración (selección de impulsores)
+El objetivo de esta iteración es detallar las interfaces de comunicación y los mecanismos de control de acceso para garantizar la extensibilidad del sistema frente a nuevos dispositivos, asegurar la adaptabilidad operativa en entornos de red inestables y robustecer la seguridad en la frontera mediante la validación de identidades autorizadas.
+
+
+- **QA-2**: Modificabilidad
+- **QA-3**: Extensibilidad
+- **QA-4**: Seguridad
+- **QA-8**: Adaptabilidad
+
+
+
+### Paso 3: Elegir los elementos del sistema a refinar
+
+A partir de la arquitectura de referencia establecida en la primera iteración, se han identificado los siguientes elementos arquitectónicos que requieren refinamiento y descomposición para satisfacer los escenarios de extensibilidad, adaptación y seguridad seleccionados:
+
+* **El Nodo de Procesamiento Local (Edge Computing Node):**
+
+    Es el elemento más crítico para esta iteración. Requiere refinamiento para soportar la Extensibilidad (debe diseñarse para aceptar nuevos modelos de cámaras sin alterar la lógica central), la Adaptación (debe implementar la lógica de Store-and-Forward para gestionar las pérdidas de red) y la Seguridad (debe incorporar el submódulo de validación de tokens Stateless para la ruta local).
+
+* **El Cliente Ligero (App Móvil / SPA):**
+
+    Requiere refinamiento interno para soportar la Adaptación. El cliente debe evolucionar de ser un simple visor a un componente inteligente capaz de detectar el contexto de red (LAN vs. WAN) y decidir dinámicamente qué ruta de conexión o endpoint utilizar.
+
+* **El API Gateway (Frontera de la Nube):**
+
+    Aunque se introdujo conceptualmente en la primera iteración, debe refinarse en esta etapa para formalizar su responsabilidad en la Seguridad, específicamente como el emisor y validador remoto de los artefactos de identidad autocontenidos (Tokens Stateless), controlando el acceso de los dispositivos autorizados.
+
+\newpage
+
+### Paso 4: Elegir los conceptos de diseño
+
+| Arquitectura / Patrón| Por qué se seleccionó|
+| :--- | :------ |
+| **Patrón Strategy / Adapter**  |  Implementas un "Adaptador" para cada marca o modelo. Cuando agregas una cámara nueva de otra marca, solo creas un archivo de configuración o un pequeño plugin, pero el 0% del código central (el que procesa la IA o guarda el video) se toca. |
+| **Táctica de Lista de Permitidos (Allowlisting)** | El API Gateway o un servicio de "Provisionamiento" debe gestionar una base de datos de IDs únicos (como la dirección MAC o un número de serie firmado). |
+| **Degradación elegante (Graceful Degradation)** |  El sistema identifica qué funciones son críticas y cuáles son secundarias. Ante un cambio de ambiente (pérdida de WAN, fallo de un sensor, caída de la nube), suspende las funciones secundarias y garantiza que las críticas —grabación local, detección, alarmas— sigan operando. Esto complementa el Store-and-Forward de la primera iteración dándole una política de decisión explícita. |
+
+
+### Diagramas
+<br>
+<div style="text-align:center">
+![Patrón Strategy /Adapter](../image/strategy.png){fig-cap="Figura 1: Despliegue" width="500px" fig-alt="Diagrama de Patrón Strategy /Adapter"}
+</div>
+
+### Paso 5: Instanciar elementos arquitectónicos y asignar responsabilidades
+
+
+| Concepto de Diseño | Elementos Instanciados | Responsabilidades |
+| :--- | :---- | :----- |
+| **Patrón Strategy / Adapter** <br>*(Resuelve QA-2 y QA-3)* | `DeviceManager` (Gestor de Dispositivos) | Lee los archivos de configuración externos (JSON/YAML) en tiempo de ejecución para saber qué dispositivos existen. Inyecta dinámicamente el adaptador correspondiente sin requerir recompilación del núcleo. |
+| | `HardwareAdapterInterface` (Interfaz Estándar) | Define el contrato universal (los métodos estándar) que el sistema central utilizará para interactuar con cualquier cámara o sensor, aislando al sistema de la marca del hardware. |
+| | `SpecificDeviceAdapter` (Plugins/Adaptadores) | Traduce los protocolos específicos de un modelo de cámara (ej. ONVIF) o sensor (ej. MQTT) a la `HardwareAdapterInterface`. Estos se agregan como librerías dinámicas o microservicios independientes. |
+| **Táctica de Allowlisting** <br>*(Resuelve QA-4)* | `ProvisioningService` (Servicio de Aprovisionamiento) | Expone una API para que los técnicos autorizados registren los identificadores únicos (dirección MAC, número de serie o certificado mTLS) de los dispositivos de hardware nuevos en el panel central. |
+| | `DeviceRegistryDB` (BD de Registro) | Almacena de manera segura la "lista blanca" (Allowlist) que contiene la identidad y estado de todos los dispositivos válidos del sistema. |
+| | `AuthenticationGateway` (Puerta de Enlace de Seguridad) | Intercepta cualquier intento de conexión de un dispositivo físico. Consulta la `DeviceRegistryDB` y bloquea inmediatamente cualquier flujo de datos proveniente de hardware no registrado. |
+| **Degradación Elegante** <br>*(Resuelve QA-8)* | `EnvironmentMonitor` (Monitor de Entorno) | Monitorea constantemente las métricas críticas del sistema y la red (latencia WAN, disponibilidad de la nube, estado del almacenamiento local del nodo Edge). |
+| | `PolicyDecisionEngine` (Motor de Políticas) | Evalúa los datos del `EnvironmentMonitor` contra reglas predefinidas. Decide en tiempo real qué modo de operación adoptar (ej. "Modo Offline", "Modo Bajo Ancho de Banda"). |
+| | `ServiceOrchestrator` (Orquestador de Servicios) | Ejecuta las decisiones del Motor de Políticas. Suspende servicios secundarios (ej. streaming de video en alta resolución a la nube) y redirige los recursos de procesamiento para garantizar que las funciones críticas (ej. inferencia de IA local y guardado en disco) sigan operando al 100%. |
+
+
+
+### Paso 6: Bosquejar vistas y registrar decisiones (ADR)
+
+
+### Diagramas
+<br>
+<div style="text-align:center">
+![Instanciación 2 de desiciones de diseño Edge Cloud](../image/arquitectura.png){fig-cap="Figura 1: Despliegue" width="450px" fig-alt="Diagrama de Arquitectura general"}
+</div>
+<br>
+
+
+<br>
+<div style="text-align:center">
+![Mdulos obtenidos de la arquitectura de referencia](../image/modulos.png){fig-cap="Figura 1: Despliegue" width="450px" fig-alt="Mdulos obtenidos de la arquitectura de referencia"}
+</div>
+<br>
+
+
+<br>
+<div style="text-align:center">
+![Diagrama de despliegue](../image/despliegue.png){fig-cap="Figura 1: Despliegue" width="450px" fig-alt="Diagrama de despliegue"}
+</div>
+<br>
+
+
+### Paso 7: Analizar el diseño respecto al objetivo y definir pruebas
+
+La siguiente tabla Kanva resume el progreso de diseño  y las deciciones tomadas durante esta iteración, enfocándose en los casos de uso y requisitos de calidad relacionados con los impulsores seleccionados (QA-2, QA-3, QA-4 y QA-8).
+
+<br>
+
+| Not addressed | Partially addressed | Completely addressed | Design decisions made during the iteration |
+| :--: | :---: | :---: | :------- |
+| | **UC-1** | | No se realizaron decisiones relevantes en está iteración. |
+| | **UC-2** | | No se realizaron decisiones relevantes en está iteración. |
+| | **UC-3** | | No se realizaron decisiones relevantes en está iteración. |
+| | **UC-4** | | Los modulos a través de las capas e interfaces para satisfacer este caso de uso ha sido identificado. |
+| | **UC-5** | | Los modulos a través de las capas e interfaces para satisfacer este caso de uso ha sido identificado. |
+| | **UC-6** | | No se realizaron decisiones relevantes en está iteración. |
+| | **UC-7** | | Los modulos a través de las capas e interfaces para satisfacer este caso de uso ha sido identificado. |
+| | **UC-8** | | No se realizaron decisiones relevantes en está iteración. |
+| | **UC-9** | | Los modulos a través de las capas e interfaces para satisfacer este caso de uso ha sido identificado. |
+| | **UC-10** | | No se realizaron decisiones relevantes en está iteración. |
+| | **UC-11** | | No se realizaron decisiones relevantes en está iteración. |
+| **UC-12** | | | No se realizaron decisiones relevantes en está iteración. |
+| | **UC-13** | | Los modulos a través de las capas e interfaces para satisfacer este caso de uso ha sido identificado. |
+| | **UC-14** | | Los modulos a través de las capas e interfaces para satisfacer este caso de uso ha sido identificado. |
+| | **UC-15** | | No se realizaron decisiones relevantes en está iteración. |
+| | **QA-1** | | La arquitectura de referencia seleccionada soporta está funcionalidad.|
+| | | **QA-2** | Dado el patrón Strategy, es posible conectar camáras y sensores de distintos proveedores. |
+| | | **QA-3** | Agregando un archivo de configuración o plugin para los nuevos dispositivos agregados. |
+| | | **QA-4** | La Táctica de Lista de Permitidos (Allowlisting) permite que solo dispositivos autorizados o permitidos puedan ser conectados al sistema. |
+| | **QA-5** | | No se realizaron decisiones relevantes en está iteración. |
+| | **QA-6** | | No se realizaron decisiones relevantes en está iteración. |
+| | **QA-7** | | No se realizaron decisiones relevantes en está iteración. |
+| | **QA-8** | | El concepto de degradación elegante garantiza que dependiendo del contexto que se encuentre, tendrá disponible el 100% de sus funcionalidades principales. Suspendiendo funcionalidades no esenciales. |
+| | **QA-9** | | No se realizaron decisiones relevantes en está iteración. |
+| | **QA-10** | | No se realizaron decisiones relevantes en está iteración. |
+| | **QA-11** | | No se realizaron decisiones relevantes en está iteración. |
+| | **CRN-1** | | Se agregan nuevos elementos a la arquitectura de referencia. |
+| | **CRN-2** | | Los modulos a través de las capas e interfaces para satisfacer este caso de uso ha sido identificado. |
+| | **CRN-3** | | Los modulos a través de las capas e interfaces para satisfacer este caso de uso ha sido identificado. |
+| **CRN-4** | | | No se realizaron decisiones relevantes en está iteración. |
+| **CON-1** | | | No se realizaron decisiones relevantes en está iteración. |
+| | **CON-2** | | No se realizaron decisiones relevantes en está iteración. |
+| | **CON-3** | | No se realizaron decisiones relevantes en está iteración. |
